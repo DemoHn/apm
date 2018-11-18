@@ -1,0 +1,22 @@
+apm:
+  runtime_dir:
+    $HOME/.apm
+  tower:
+    type: tcp
+    host: 127.0.0.1
+    port: 12306
+apps:
+  - name: Hong Kong Journalist
+    command: go run main.go
+    # or using path - args
+    path: go
+    args:
+      - run
+      - -v
+      - main.go
+    env:
+      MCE_ENV: development
+      MCE_OS: linux
+      DATABASE_URL: mysql://hello-world
+    auto_restart: true
+    auto_start: true
