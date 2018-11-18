@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/DemoHn/apm/mod/master"
 	"github.com/urfave/cli"
@@ -33,7 +34,8 @@ func daemonHandler(c *cli.Context) error {
 	}()
 
 	fmt.Println("[apm] listening to server")
-	signal.Notify(quit)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	// wait for quit signal
 	<-quit
 
 	fmt.Println("[apm] going to shutdown")

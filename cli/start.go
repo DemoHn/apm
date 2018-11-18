@@ -25,12 +25,10 @@ func startHandler(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-
 	if resp.IsSuccess == true {
-		fmt.Printf("[apm] start instance success. ID = %d, pid = %d", resp.InstanceID, resp.PID)
+		fmt.Printf("[apm] start instance success - ID = %d, pid = %d", resp.InstanceID, resp.PID)
 	} else {
 		fmt.Printf("[apm] start instance failed - error: %v", resp.Error)
 	}
-
 	return nil
 }
