@@ -28,7 +28,7 @@ func startHandler(c *cli.Context) error {
 	if resp.IsSuccess == true {
 		fmt.Printf("[apm] start instance success - ID = %d, pid = %d", resp.InstanceID, resp.PID)
 	} else {
-		fmt.Printf("[apm] start instance failed - error: %v", resp.Error)
+		fmt.Printf("[apm] start instance failed - error: %s", resp.Error)
 	}
 	return nil
 }

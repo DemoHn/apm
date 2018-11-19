@@ -2,6 +2,7 @@ package master
 
 import (
 	"sync"
+	"syscall"
 
 	"github.com/DemoHn/apm/mod/instance"
 	"github.com/DemoHn/apm/util"
@@ -51,7 +52,7 @@ func (m *Master) StartInstance(req *StartInstanceRequest) (*instance.Instance, e
 	if err != nil {
 		return nil, err
 	}
-
+	// create instance
 	inst := instance.New(prog, args)
 	err2 := m.addInstance(req.Name, inst)
 	if err2 != nil {
@@ -61,6 +62,21 @@ func (m *Master) StartInstance(req *StartInstanceRequest) (*instance.Instance, e
 	go func() {
 		inst.Run()
 	}()
+	return inst, nil
+}
+
+// StopInstance - stop instance
+// Notice: still should wait for
+func (m *Master) StopInstance(id int) (*instance.Instance, error) {
+	inst, err := m.findInstance(id)
+	if err != nil {
+		return nil, err
+	}
+
+	err2 := inst.Stop(syscall.SIGTERM)
+	if err2 != nil {
+		return nil, err2
+	}
 	return inst, nil
 }
 

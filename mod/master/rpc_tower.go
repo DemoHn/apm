@@ -1,6 +1,8 @@
 package master
 
 import (
+	"fmt"
+
 	"github.com/DemoHn/apm/mod/instance"
 )
 
@@ -18,29 +20,38 @@ func (t *Tower) StartInstance(req *StartInstanceRequest, resp *StartInstanceResp
 		return err
 	}
 
-	// listen to events
-	l := inst.NewListener()
-	for evt := range l {
-		switch v := evt.(type) {
-		case instance.StartEvent:
-			resp.IsSuccess = true
-			resp.InstanceID = evt.InstanceID()
-			resp.PID = v.Pid
-
-			return nil
-		case instance.ErrorEvent:
-			resp.IsSuccess = false
-			resp.Error = v.Error
-			resp.InstanceID = evt.InstanceID()
-
-			return nil
-		}
+	select {
+	case e := <-inst.Once(instance.ActionStart):
+		resp.IsSuccess = true
+		resp.InstanceID = e.Int(0)
+		resp.PID = e.Int(1)
+	case e := <-inst.Once(instance.ActionError):
+		resp.IsSuccess = false
+		resp.InstanceID = e.Int(0)
+		resp.Error = e.String(2)
 	}
+
 	return nil
 }
 
-// Echo returns the same message - just for testing RPC
-func (t *Tower) Echo(input string, output *string) error {
-	*output = input
+// StopInstance -
+func (t *Tower) StopInstance(req *StopInstanceRequest, resp *StopInstanceResponse) error {
+	// TODO
+	master := t.master
+	inst, err := master.StopInstance(req.ID)
+	if err != nil {
+		return err
+	}
+
+	select {
+	case e := <-inst.Once(instance.ActionStop):
+		resp.IsSuccess = true
+		fmt.Println("data", e.Args)
+		resp.InstanceID = e.Int(0)
+	case e := <-inst.Once(instance.ActionError):
+		resp.IsSuccess = false
+		resp.InstanceID = e.Int(0)
+		resp.Error = e.String(2)
+	}
 	return nil
 }

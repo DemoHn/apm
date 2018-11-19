@@ -1,5 +1,11 @@
 package instance
 
+import (
+	"fmt"
+
+	"github.com/olebedev/emitter"
+)
+
 // EventConfig defines all switches of a command that triggers
 // the corresponding event
 type EventConfig struct {
@@ -10,78 +16,24 @@ type EventConfig struct {
 	OnStderrData bool
 }
 
-// Event is an interface
-type Event interface {
-	// InstanceID - get instancce ID
-	InstanceID() int
-	// Name - get event (Action) name
-	Name() string
-}
-
 // EventHandle manages all events
 type EventHandle struct {
-	listeners []chan Event
-	config    *EventConfig
+	config  *EventConfig
+	emitter *emitter.Emitter
 }
+
+// Event -
+type Event = emitter.Event
 
 // Action -
 type Action = string
 
 const (
-	ActionStart          Action = "ACTION_START"
-	ActionStop           Action = "ACTION_STOP"
-	ActionRestart        Action = "ACTION_RESTART"
-	ActionEncounterError Action = "ACTION_ENCOUNTER_ERROR"
+	ActionStart   Action = "action_start"
+	ActionStop    Action = "action_stop"
+	ActionRestart Action = "action_restart"
+	ActionError   Action = "action_error"
 )
-
-// StartEvent -
-type StartEvent struct {
-	instanceID int
-	Pid        int
-}
-
-// Name - get event name
-func (evt StartEvent) Name() string {
-	return ActionStart
-}
-
-// InstanceID -
-func (evt StartEvent) InstanceID() int {
-	return evt.instanceID
-}
-
-// StopEvent -
-type StopEvent struct {
-	ExitCode   int
-	instanceID int
-}
-
-// Name - get event name
-func (evt StopEvent) Name() string {
-	return ActionStop
-}
-
-// InstanceID -
-func (evt StopEvent) InstanceID() int {
-	return evt.instanceID
-}
-
-// ErrorEvent -
-type ErrorEvent struct {
-	instanceID int
-	Action     string
-	Error      error
-}
-
-// Name - get event name
-func (evt ErrorEvent) Name() string {
-	return ActionEncounterError
-}
-
-// InstanceID -
-func (evt ErrorEvent) InstanceID() int {
-	return evt.instanceID
-}
 
 // methods
 func newEventHandle() *EventHandle {
@@ -94,75 +46,40 @@ func newEventHandle() *EventHandle {
 	}
 
 	eventHandle := &EventHandle{
-		config:    defaultEventConfig,
-		listeners: make([]chan Event, 0),
+		config:  defaultEventConfig,
+		emitter: &emitter.Emitter{},
 	}
 
 	return eventHandle
 }
 
-func (handle *EventHandle) newListener() <-chan Event {
-	listener := make(chan Event)
-	handle.listeners = append(handle.listeners, listener)
-
-	return listener
+// Close - close all event listeners
+func (handle *EventHandle) Close() {
+	handle.emitter.Off("*")
 }
 
-func (handle *EventHandle) closeAll() {
-	for _, cs := range handle.listeners {
-		close(cs)
-	}
-}
+// SendEvent - send corresponding event to instance
+func (handle *EventHandle) SendEvent(action Action, inst *Instance, err error) {
+	fmt.Printf("action = %s, err = %v\n", action, err)
 
-// sendEvent - send corresponding event to instance
-func (handle *EventHandle) sendEvent(Action Action, instance *Instance, err error) {
-	var evt Event
-	evt = nil
-
+	emitter := handle.emitter
 	// send error event
 	if err != nil {
-		evt = ErrorEvent{
-			instanceID: instance.ID,
-			Action:     Action,
-			Error:      err,
-		}
+		// send error event with no other reasons
+		// params: [id, action_name, error]
+		emitter.Emit(ActionError, inst.ID, action, err.Error())
 	} else {
 		// send concrete events
-		switch Action {
+		switch action {
 		case ActionStart:
 			// make sure the command EXISTS!
-			pid := instance.Command.Process.Pid
-			evt = StartEvent{
-				instanceID: instance.ID,
-				Pid:        pid,
-			}
+			pid := inst.Command.Process.Pid
+			// params: [id, pid]
+			emitter.Emit(ActionStart, inst.ID, pid)
 		case ActionStop:
 			// TODO: how to get the exit code?
 			exitCode := 0
-			evt = StopEvent{
-				instanceID: instance.ID,
-				ExitCode:   exitCode,
-			}
+			emitter.Emit(ActionStop, inst.ID, exitCode)
 		}
 	}
-
-	// fan-out to all event listeners
-	for _, cs := range handle.listeners {
-		if handle.filterEvent(evt) == true {
-			cs <- evt
-		}
-	}
-}
-
-func (handle *EventHandle) filterEvent(evt Event) bool {
-	switch evt.Name() {
-	case ActionStart:
-		return handle.config.OnStart
-	case ActionStop:
-		return handle.config.OnStop
-	case ActionEncounterError:
-		return true
-	}
-
-	return false
 }

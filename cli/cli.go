@@ -26,6 +26,12 @@ func Parse(args []string) error {
 			Flags:  startFlags,
 			Action: startHandler,
 		},
+		{
+			Name:   "stop",
+			Usage:  "stop the instance of assigned ID",
+			Flags:  stopFlags,
+			Action: stopHandler,
+		},
 	}
 
 	// parse and go

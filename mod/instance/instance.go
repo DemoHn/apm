@@ -1,9 +1,12 @@
 package instance
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"sync"
+
+	"github.com/olebedev/emitter"
 )
 
 // Instance type defines a general instance type
@@ -64,23 +67,43 @@ func (inst *Instance) Run() {
 	inst.Command = cmd
 	// auto-start
 	err = cmd.Start()
-	eventHandle.sendEvent(ActionStart, inst, err)
+	eventHandle.SendEvent(ActionStart, inst, err)
 
 	if err == nil {
 		setStatus(inst, statusRunning)
 		err = cmd.Wait()
-		eventHandle.sendEvent(ActionStop, inst, err)
+		eventHandle.SendEvent(ActionStop, inst, err)
 	}
 
 	setStatus(inst, statusStopped)
 	// finish and cancel sendEvent() go-rountines
-	eventHandle.closeAll()
+	eventHandle.Close()
 }
 
-// NewListener - add listener to receive events
-func (inst *Instance) NewListener() <-chan Event {
-	eventHandle := inst.eventHandle
-	return eventHandle.newListener()
+// Stop - stop instance.
+// Notice: It will just send a SIGTERM signal to the running process
+// and will not stop it immediately.
+func (inst *Instance) Stop(signal os.Signal) error {
+	if inst.status != statusRunning {
+		return fmt.Errorf("[apm] instance is not running, thus stop failed")
+	}
+	// send stop signal
+	err := inst.Command.Process.Signal(signal)
+	return err
+}
+
+// ForceStop - stop the instnace by force
+func (inst *Instance) ForceStop() error {
+	if inst.status != statusRunning {
+		return fmt.Errorf("[apm] instance is not running, thus forceStop failed")
+	}
+	err := inst.Command.Process.Kill()
+	return err
+}
+
+// Once - add listener to receive events
+func (inst *Instance) Once(topic string) <-chan Event {
+	return inst.eventHandle.emitter.Once(topic, emitter.Sync)
 }
 
 // GetStatus - get status

@@ -23,6 +23,13 @@ func (m *Master) initInstanceMap() error {
 	return nil
 }
 
+func (m *Master) findInstance(id int) (*instance.Instance, error) {
+	if inst, ok := m.instances.instanceMap[id]; ok {
+		return inst, nil
+	}
+	return nil, fmt.Errorf("[apm] instnace id(%d) not found", id)
+}
+
 func (m *Master) addInstance(name string, instance *instance.Instance) error {
 	if m.instances == nil {
 		return fmt.Errorf("master.instances not found! initInstanceMap() did executed?")
