@@ -21,7 +21,8 @@ type StopInstanceRequest struct {
 
 // StopInstanceResponse defines the reply of `Tower.StopInstance`
 type StopInstanceResponse struct {
-	Error      string
 	IsSuccess  bool
+	ExitCode   int
+	Error      string
 	InstanceID int
 }

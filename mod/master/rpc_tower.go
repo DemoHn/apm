@@ -1,8 +1,6 @@
 package master
 
 import (
-	"fmt"
-
 	"github.com/DemoHn/apm/mod/instance"
 )
 
@@ -46,8 +44,8 @@ func (t *Tower) StopInstance(req *StopInstanceRequest, resp *StopInstanceRespons
 	select {
 	case e := <-inst.Once(instance.ActionStop):
 		resp.IsSuccess = true
-		fmt.Println("data", e.Args)
 		resp.InstanceID = e.Int(0)
+		resp.ExitCode = e.Int(1)
 	case e := <-inst.Once(instance.ActionError):
 		resp.IsSuccess = false
 		resp.InstanceID = e.Int(0)

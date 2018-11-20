@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"sync"
+	"syscall"
 
 	"github.com/olebedev/emitter"
 )
@@ -72,7 +73,19 @@ func (inst *Instance) Run() {
 	if err == nil {
 		setStatus(inst, statusRunning)
 		err = cmd.Wait()
-		eventHandle.SendEvent(ActionStop, inst, err)
+		// if err = *exec.ExitError, that means the process returned
+		// with non-zero value
+		if err == nil {
+			eventHandle.SendEvent(ActionStop, inst, nil, 0)
+		} else {
+			if exitError, ok := err.(*exec.ExitError); ok {
+				ws := exitError.Sys().(syscall.WaitStatus)
+				exitCode := ws.ExitStatus()
+				eventHandle.SendEvent(ActionStop, inst, nil, exitCode)
+			} else {
+				eventHandle.SendEvent(ActionStop, inst, err)
+			}
+		}
 	}
 
 	setStatus(inst, statusStopped)

@@ -1,8 +1,6 @@
 package instance
 
 import (
-	"fmt"
-
 	"github.com/olebedev/emitter"
 )
 
@@ -29,10 +27,14 @@ type Event = emitter.Event
 type Action = string
 
 const (
-	ActionStart   Action = "action_start"
-	ActionStop    Action = "action_stop"
+	// ActionStart -
+	ActionStart Action = "action_start"
+	// ActionStop -
+	ActionStop Action = "action_stop"
+	// ActionRestart -
 	ActionRestart Action = "action_restart"
-	ActionError   Action = "action_error"
+	// ActionError -
+	ActionError Action = "action_error"
 )
 
 // methods
@@ -59,9 +61,7 @@ func (handle *EventHandle) Close() {
 }
 
 // SendEvent - send corresponding event to instance
-func (handle *EventHandle) SendEvent(action Action, inst *Instance, err error) {
-	fmt.Printf("action = %s, err = %v\n", action, err)
-
+func (handle *EventHandle) SendEvent(action Action, inst *Instance, err error, args ...interface{}) {
 	emitter := handle.emitter
 	// send error event
 	if err != nil {
@@ -77,8 +77,11 @@ func (handle *EventHandle) SendEvent(action Action, inst *Instance, err error) {
 			// params: [id, pid]
 			emitter.Emit(ActionStart, inst.ID, pid)
 		case ActionStop:
-			// TODO: how to get the exit code?
 			exitCode := 0
+			exitArg := args[0]
+			if code, ok := exitArg.(int); ok {
+				exitCode = code
+			}
 			emitter.Emit(ActionStop, inst.ID, exitCode)
 		}
 	}

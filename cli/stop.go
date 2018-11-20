@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-	
+
 	"github.com/DemoHn/apm/mod/master"
 	"github.com/urfave/cli"
 )
@@ -27,7 +27,7 @@ func stopHandler(c *cli.Context) error {
 	}
 
 	if resp.IsSuccess == true {
-		fmt.Printf("[apm] stop instance success - ID = %d", resp.InstanceID)
+		fmt.Printf("[apm] stop instance success - ID = %d, code = %d", resp.InstanceID, resp.ExitCode)
 	} else {
 		fmt.Printf("[apm] stop instance error - error = %s", resp.Error)
 	}
