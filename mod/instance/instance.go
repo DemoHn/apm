@@ -118,7 +118,7 @@ func (inst *Instance) ForceStop() error {
 
 // Once - add listener to receive events
 func (inst *Instance) Once(topic string) <-chan Event {
-	return inst.eventHandle.emitter.Once(topic, emitter.Sync)
+	return inst.eventHandle.Once(topic, emitter.Sync)
 }
 
 // GetStatus - get status

@@ -10,7 +10,7 @@ import (
 func Test_SplitCommand(t *testing.T) {
 	g := Goblin(t)
 
-	g.Describe("Util: splitCommand()", func() {
+	g.Describe("Util > splitCommand()", func() {
 
 		g.It("should pass all tests", func() {
 			testcases := []string{
