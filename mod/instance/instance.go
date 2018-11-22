@@ -70,7 +70,7 @@ func (inst *Instance) Run() {
 	inst.command = cmd
 	// auto-start
 	err = cmd.Start()
-	eventHandle.SendEvent(ActionStart, inst, err)
+	eventHandle.sendEvent(ActionStart, inst, err)
 
 	if err == nil {
 		setStatus(inst, statusRunning)
@@ -78,28 +78,28 @@ func (inst *Instance) Run() {
 		// if err = *exec.ExitError, that means the process returned
 		// with non-zero value
 		if err == nil {
-			eventHandle.SendEvent(ActionStop, inst, nil, 0)
+			eventHandle.sendEvent(ActionStop, inst, nil, 0)
 		} else {
 			if exitError, ok := err.(*exec.ExitError); ok {
 				ws := exitError.Sys().(syscall.WaitStatus)
 				exitCode := ws.ExitStatus()
-				eventHandle.SendEvent(ActionStop, inst, nil, exitCode)
+				eventHandle.sendEvent(ActionStop, inst, nil, exitCode)
 			} else {
-				eventHandle.SendEvent(ActionStop, inst, err)
+				eventHandle.sendEvent(ActionStop, inst, err)
 			}
 		}
 	}
 
 	setStatus(inst, statusStopped)
 	// finish and cancel sendEvent() go-rountines
-	eventHandle.Close()
+	eventHandle.close()
 }
 
 // Stop - stop instance.
 // Notice: It will just send a SIGTERM signal to the running process
 // and will not stop it immediately.
 func (inst *Instance) Stop(signal os.Signal) error {
-	if inst.status != statusRunning {
+	if inst.GetStatus() != statusRunning {
 		return fmt.Errorf("[apm] instance is not running, thus stop failed")
 	}
 	// send stop signal
@@ -109,7 +109,7 @@ func (inst *Instance) Stop(signal os.Signal) error {
 
 // ForceStop - stop the instnace by force
 func (inst *Instance) ForceStop() error {
-	if inst.status != statusRunning {
+	if inst.GetStatus() != statusRunning {
 		return fmt.Errorf("[apm] instance is not running, thus forceStop failed")
 	}
 	err := inst.command.Kill()

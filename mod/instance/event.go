@@ -54,12 +54,12 @@ func newEventHandle() *EventHandle {
 }
 
 // Close - close all event listeners
-func (handle *EventHandle) Close() {
+func (handle *EventHandle) close() {
 	handle.Emitter.Off("*")
 }
 
 // SendEvent - send corresponding event to instance
-func (handle *EventHandle) SendEvent(action Action, inst *Instance, err error, args ...interface{}) {
+func (handle *EventHandle) sendEvent(action Action, inst *Instance, err error, args ...interface{}) {
 	emitter := handle.Emitter
 	// send error event
 	if err != nil {
