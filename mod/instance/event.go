@@ -61,26 +61,26 @@ func (handle *EventHandle) close() {
 // SendEvent - send corresponding event to instance
 func (handle *EventHandle) sendEvent(action Action, inst *Instance, err error, args ...interface{}) {
 	emitter := handle.Emitter
-	// send error event
+
+	// send error event with no other reasons
 	if err != nil {
-		// send error event with no other reasons
 		// params: [id, action_name, error]
 		emitter.Emit(ActionError, inst.ID, action, err.Error())
-	} else {
-		// send concrete events
-		switch action {
-		case ActionStart:
-			// make sure the command EXISTS!
-			pid := inst.Command.Process.Pid
-			// params: [id, pid]
-			emitter.Emit(ActionStart, inst.ID, pid)
-		case ActionStop:
-			exitCode := 0
-			exitArg := args[0]
-			if code, ok := exitArg.(int); ok {
-				exitCode = code
-			}
-			emitter.Emit(ActionStop, inst.ID, exitCode)
+		return
+	}
+	// send concrete events
+	switch action {
+	case ActionStart:
+		// make sure the command EXISTS!
+		pid := inst.command.GetPID()
+		// params: [id, pid]
+		emitter.Emit(ActionStart, inst.ID, pid)
+	case ActionStop:
+		exitCode := 0
+		exitArg := args[0]
+		if code, ok := exitArg.(int); ok {
+			exitCode = code
 		}
+		emitter.Emit(ActionStop, inst.ID, exitCode)
 	}
 }

@@ -103,7 +103,7 @@ func (inst *Instance) Stop(signal os.Signal) error {
 		return fmt.Errorf("[apm] instance is not running, thus stop failed")
 	}
 	// send stop signal
-	err := inst.command.SendSignal(signal)
+	err := inst.command.Stop(signal)
 	return err
 }
 

@@ -146,7 +146,6 @@ func TestEvent(t *testing.T) {
 
 			g.Assert(timeout).Equal(false)
 			g.Assert(evtName).Equal(ActionStop)
-			fmt.Println(evt.Args)
 			// instn ID
 			g.Assert(evt.Int(0)).Equal(401)
 			// exit code
