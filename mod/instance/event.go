@@ -16,8 +16,8 @@ type EventConfig struct {
 
 // EventHandle manages all events
 type EventHandle struct {
-	config  *EventConfig
-	emitter *emitter.Emitter
+	config *EventConfig
+	*emitter.Emitter
 }
 
 // Event -
@@ -47,22 +47,20 @@ func newEventHandle() *EventHandle {
 		OnStderrData: false,
 	}
 
-	eventHandle := &EventHandle{
+	return &EventHandle{
 		config:  defaultEventConfig,
-		emitter: &emitter.Emitter{},
+		Emitter: &emitter.Emitter{},
 	}
-
-	return eventHandle
 }
 
 // Close - close all event listeners
-func (handle *EventHandle) Close() {
-	handle.emitter.Off("*")
+func (handle *EventHandle) close() {
+	handle.Emitter.Off("*")
 }
 
 // SendEvent - send corresponding event to instance
-func (handle *EventHandle) SendEvent(action Action, inst *Instance, err error, args ...interface{}) {
-	emitter := handle.emitter
+func (handle *EventHandle) sendEvent(action Action, inst *Instance, err error, args ...interface{}) {
+	emitter := handle.Emitter
 	// send error event
 	if err != nil {
 		// send error event with no other reasons
