@@ -3,12 +3,17 @@
 package account
 
 import (
-	"syscall"
+	"errors"
+	"fmt"
 	"os/exec"
 	"os/user"
+	"strings"
+	"syscall"
 )
-const chpasswdCmd := "chpasswd"
-const useraddCmd := "useradd"
+
+const chpasswdCmd = "chpasswd"
+const useraddCmd = "useradd"
+
 // UnixAccount - unix account type
 type UnixAccount struct {
 	init     bool
@@ -16,6 +21,7 @@ type UnixAccount struct {
 	password string
 	group    string
 }
+
 // <internal function>
 func execSync(program string, args ...string) (int, error) {
 	cmd := exec.Command(program, args...)
@@ -30,8 +36,8 @@ func execSync(program string, args ...string) (int, error) {
 		if ws, ok2 := serr.Sys().(syscall.WaitStatus); ok2 {
 			exitCode := ws.ExitStatus()
 			return exitCode, nil
-		}		
-		return -1, fmt.Errof("get errCode failed")
+		}
+		return -1, fmt.Errorf("get errCode failed")
 	}
 	return -1, err
 }
@@ -106,7 +112,7 @@ func (account *UnixAccount) IfInGroup(group string) (bool, error) {
 	// now it's time to check if groupId in groupIds
 	found := false
 	for _, groupId := range groupIds {
-		if strings.Compare(groupdId, lGroup.Gid) == 0 {
+		if strings.Compare(groupId, lGroup.Gid) == 0 {
 			found = true
 			break
 		}
@@ -122,6 +128,7 @@ func (account *UnixAccount) Create() error {
 	}
 	// exec 'useradd' command
 	//execSync()
+	return nil
 }
 
 // Remove - TODO
@@ -129,8 +136,10 @@ func (account *UnixAccount) Remove() error {
 	if account.init == false {
 		return objNotInitError()
 	}
+	return nil
 }
 
+// SetSysProcAttr -
 func (account *UnixAccount) SetSysProcAttr(oldAttr syscall.SysProcAttr) (syscall.SysProcAttr, error) {
 	if account.init == false {
 		return oldAttr, objNotInitError()

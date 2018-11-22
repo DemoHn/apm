@@ -1,7 +1,9 @@
 package instance
 
 import (
+	"fmt"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -78,16 +80,16 @@ func TestEvent(t *testing.T) {
 			g.Assert(evt.String(1)).Equal(ActionStart)
 		})
 
-		g.It("should receive event: ActionStop (exitCode != 0)", func() {
+		g.It("should receive event: ActionStop (kill by signal)", func() {
 			// consts
-			const expExitCode = 29
+			const expExitCode = 23
 			// vars
 			var evtName string
 			var evt emitter.Event
 			var timeout = false
 
 			cwd, _ := os.Getwd()
-			nInst := New(cwd+"/../../bin/apm-test-helper", []string{"normal-run", string(expExitCode)})
+			nInst := New(cwd+"/../../bin/apm-test-helper", []string{"normal-run", strconv.Itoa(expExitCode)})
 			nInst.ID = 400
 
 			go func() {
@@ -115,6 +117,68 @@ func TestEvent(t *testing.T) {
 			g.Assert(evtName).Equal(ActionStop)
 			// instn ID
 			g.Assert(evt.Int(0)).Equal(400)
+			// exit code
+			g.Assert(evt.Int(1)).Equal(expExitCode)
+		})
+
+		g.It("should receive event: ActionStop (stopped naturally)", func() {
+			// consts
+			const expExitCode = 20
+			// vars
+			var evtName string
+			var evt emitter.Event
+			var timeout = false
+
+			cwd, _ := os.Getwd()
+			nInst := New(cwd+"/../../bin/apm-test-helper", []string{"stop-on-time", "20", strconv.Itoa(expExitCode)})
+			nInst.ID = 401
+
+			go func() {
+				nInst.Run()
+			}()
+
+			select {
+			case evt = <-nInst.Once(ActionStop):
+				evtName = ActionStop
+			case <-time.After(3 * time.Second):
+				timeout = true
+			}
+
+			g.Assert(timeout).Equal(false)
+			g.Assert(evtName).Equal(ActionStop)
+			fmt.Println(evt.Args)
+			// instn ID
+			g.Assert(evt.Int(0)).Equal(401)
+			// exit code
+			g.Assert(evt.Int(1)).Equal(expExitCode)
+		})
+
+		g.It("should receive event: ActionStop (exitCode = 0)", func() {
+			// vars
+			var evtName string
+			var evt emitter.Event
+			var timeout = false
+
+			cwd, _ := os.Getwd()
+			nInst := New(cwd+"/../../bin/apm-test-helper", []string{"stop-on-time", "20"})
+			nInst.ID = 402
+
+			go func() {
+				nInst.Run()
+			}()
+
+			select {
+			case evt = <-nInst.Once(ActionStop):
+				evtName = ActionStop
+			case <-time.After(3 * time.Second):
+				timeout = true
+			}
+
+			g.Assert(timeout).Equal(false)
+			g.Assert(evtName).Equal(ActionStop)
+			fmt.Println(evt.Args)
+			// instn ID
+			g.Assert(evt.Int(0)).Equal(402)
 			// exit code
 			g.Assert(evt.Int(1)).Equal(0)
 		})
