@@ -7,6 +7,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/DemoHn/apm/mod/process"
 	"github.com/olebedev/emitter"
 )
 
@@ -20,9 +21,10 @@ type Instance struct {
 	Path string
 	// Args - command arguments
 	Args []string
-	// Command - command instance
-	Command *exec.Cmd
-	// Status - instance status READY | RUNNING | STOPPED
+
+	// command - process object
+	command *process.Process
+	// status - instance status READY | RUNNING | STOPPED
 	status string
 	// event
 	eventHandle *EventHandle
@@ -59,13 +61,13 @@ func (inst *Instance) Run() {
 
 	eventHandle := inst.eventHandle
 	// init cmd
-	cmd := exec.Command(inst.Path, inst.Args...)
+	cmd := process.New(inst.Path, inst.Args...)
 	// TODO for debugging
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	inst.Command = cmd
+	inst.command = cmd
 	// auto-start
 	err = cmd.Start()
 	eventHandle.SendEvent(ActionStart, inst, err)
@@ -101,7 +103,7 @@ func (inst *Instance) Stop(signal os.Signal) error {
 		return fmt.Errorf("[apm] instance is not running, thus stop failed")
 	}
 	// send stop signal
-	err := inst.Command.Process.Signal(signal)
+	err := inst.command.SendSignal(signal)
 	return err
 }
 
@@ -110,7 +112,7 @@ func (inst *Instance) ForceStop() error {
 	if inst.status != statusRunning {
 		return fmt.Errorf("[apm] instance is not running, thus forceStop failed")
 	}
-	err := inst.Command.Process.Kill()
+	err := inst.command.Kill()
 	return err
 }
 
