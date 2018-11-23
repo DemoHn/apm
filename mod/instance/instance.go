@@ -72,22 +72,25 @@ func (inst *Instance) Run() {
 	err = cmd.Start()
 	eventHandle.sendEvent(ActionStart, inst, err)
 
+	if err != nil {
+		return
+	}
+
+	setStatus(inst, statusRunning)
+	err = cmd.Wait()
+	// if err = *exec.ExitError, that means the process returned
+	// with non-zero value
 	if err == nil {
-		setStatus(inst, statusRunning)
-		err = cmd.Wait()
-		// if err = *exec.ExitError, that means the process returned
-		// with non-zero value
-		if err == nil {
-			eventHandle.sendEvent(ActionStop, inst, nil, 0)
-		} else {
-			if exitError, ok := err.(*exec.ExitError); ok {
-				ws := exitError.Sys().(syscall.WaitStatus)
-				exitCode := ws.ExitStatus()
-				eventHandle.sendEvent(ActionStop, inst, nil, exitCode)
-			} else {
-				eventHandle.sendEvent(ActionStop, inst, err)
-			}
-		}
+		eventHandle.sendEvent(ActionStop, inst, nil, 0)
+		return
+	}
+
+	if exitError, ok := err.(*exec.ExitError); ok {
+		ws := exitError.Sys().(syscall.WaitStatus)
+		exitCode := ws.ExitStatus()
+		eventHandle.sendEvent(ActionStop, inst, nil, exitCode)
+	} else {
+		eventHandle.sendEvent(ActionStop, inst, err)
 	}
 
 	setStatus(inst, statusStopped)

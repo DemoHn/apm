@@ -144,6 +144,7 @@ func (account *UnixAccount) SetSysProcAttr(oldAttr syscall.SysProcAttr) (syscall
 	if account.init == false {
 		return oldAttr, objNotInitError()
 	}
+	return oldAttr, nil
 }
 
 // Leave it blank, since it's not needed
