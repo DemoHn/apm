@@ -60,6 +60,12 @@ func (inst *Instance) Run() {
 	var err error
 
 	eventHandle := inst.eventHandle
+	// status check
+	if inst.GetStatus() == statusRunning {
+		err = fmt.Errorf("instance has already been started")
+		eventHandle.sendEvent(ActionStart, inst, err)
+		return
+	}
 	// init cmd
 	cmd := process.New(inst.Path, inst.Args...)
 	// TODO for debugging
@@ -80,11 +86,11 @@ func (inst *Instance) Run() {
 	err = cmd.Wait()
 	// if err = *exec.ExitError, that means the process returned
 	// with non-zero value
+	setStatus(inst, statusStopped)
 	if err == nil {
 		eventHandle.sendEvent(ActionStop, inst, nil, 0)
 		return
 	}
-
 	if exitError, ok := err.(*exec.ExitError); ok {
 		ws := exitError.Sys().(syscall.WaitStatus)
 		exitCode := ws.ExitStatus()
@@ -93,7 +99,6 @@ func (inst *Instance) Run() {
 		eventHandle.sendEvent(ActionStop, inst, err)
 	}
 
-	setStatus(inst, statusStopped)
 	// finish and cancel sendEvent() go-rountines
 	eventHandle.close()
 }
