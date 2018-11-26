@@ -5,6 +5,7 @@ require (
 	github.com/franela/goblin v0.0.0-20181003173013-ead4ad1d2727
 	github.com/mdempsky/gocode v0.0.0-20181030163406-be88cde360c2 // indirect
 	github.com/olebedev/emitter v0.0.0-20171221095905-68bb25b251f6
+	github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/testify v1.2.2
 	github.com/urfave/cli v1.20.0

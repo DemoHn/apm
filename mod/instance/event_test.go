@@ -1,7 +1,6 @@
 package instance
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 	"testing"
@@ -175,7 +174,6 @@ func TestEvent(t *testing.T) {
 
 			g.Assert(timeout).Equal(false)
 			g.Assert(evtName).Equal(ActionStop)
-			fmt.Println(evt.Args)
 			// instn ID
 			g.Assert(evt.Int(0)).Equal(402)
 			// exit code

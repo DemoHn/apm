@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"sync"
 	"syscall"
 
 	"github.com/DemoHn/apm/mod/process"
@@ -24,12 +23,10 @@ type Instance struct {
 
 	// command - process object
 	command *process.Process
-	// status - instance status READY | RUNNING | STOPPED
-	status string
+	// status - instance status struct
+	status *StatusInfo
 	// event
 	eventHandle *EventHandle
-	// mutex
-	sync.RWMutex
 }
 
 // New apm instance (the basic unit of apm management, may contains multiple processes)
@@ -39,7 +36,7 @@ func New(path string, args []string) *Instance {
 		Args:        args,
 		eventHandle: newEventHandle(),
 		// initial status
-		status: statusReady,
+		status: initStatusInfo(),
 	}
 }
 
@@ -61,7 +58,7 @@ func (inst *Instance) Run() {
 
 	eventHandle := inst.eventHandle
 	// status check
-	if inst.GetStatus() == statusRunning {
+	if inst.getStatus() == StatusRunning {
 		err = fmt.Errorf("instance has already been started")
 		eventHandle.sendEvent(ActionStart, inst, err)
 		return
@@ -76,17 +73,19 @@ func (inst *Instance) Run() {
 	inst.command = cmd
 	// auto-start
 	err = cmd.Start()
-	eventHandle.sendEvent(ActionStart, inst, err)
-
 	if err != nil {
+		eventHandle.sendEvent(ActionStart, inst, err)
 		return
 	}
 
-	setStatus(inst, statusRunning)
+	// send start event
+	inst.setStatus(StatusRunning)
+	eventHandle.sendEvent(ActionStart, inst, err)
+
 	err = cmd.Wait()
 	// if err = *exec.ExitError, that means the process returned
 	// with non-zero value
-	setStatus(inst, statusStopped)
+	inst.setStatus(StatusStopped)
 	if err == nil {
 		eventHandle.sendEvent(ActionStop, inst, nil, 0)
 		return
@@ -107,7 +106,7 @@ func (inst *Instance) Run() {
 // Notice: It will just send a SIGTERM signal to the running process
 // and will not stop it immediately.
 func (inst *Instance) Stop(signal os.Signal) error {
-	if inst.GetStatus() != statusRunning {
+	if inst.getStatus() != StatusRunning {
 		return fmt.Errorf("[apm] instance is not running, thus stop failed")
 	}
 	// send stop signal
@@ -117,7 +116,7 @@ func (inst *Instance) Stop(signal os.Signal) error {
 
 // ForceStop - stop the instnace by force
 func (inst *Instance) ForceStop() error {
-	if inst.GetStatus() != statusRunning {
+	if inst.getStatus() != StatusRunning {
 		return fmt.Errorf("[apm] instance is not running, thus forceStop failed")
 	}
 	err := inst.command.Kill()
@@ -127,9 +126,4 @@ func (inst *Instance) ForceStop() error {
 // Once - add listener to receive events
 func (inst *Instance) Once(topic string) <-chan Event {
 	return inst.eventHandle.Once(topic, emitter.Sync)
-}
-
-// GetStatus - get status
-func (inst *Instance) GetStatus() Status {
-	return getStatus(inst)
 }

@@ -7,7 +7,7 @@ import (
 	. "github.com/franela/goblin"
 )
 
-func Test_SplitCommand(t *testing.T) {
+func TestSplitCommand(t *testing.T) {
 	g := Goblin(t)
 
 	g.Describe("Util > splitCommand()", func() {

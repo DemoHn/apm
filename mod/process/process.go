@@ -20,6 +20,11 @@ func New(name string, args ...string) *Process {
 	}
 }
 
+// GetProcessState -
+func (proc *Process) GetProcessState() *os.ProcessState {
+	return proc.Cmd.ProcessState
+}
+
 // GetPID - get PID of **running** process command
 func (proc *Process) GetPID() int {
 	procState := proc.Cmd.ProcessState
