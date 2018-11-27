@@ -2,6 +2,8 @@ package instance
 
 import (
 	"sync"
+
+	"github.com/DemoHn/apm/util"
 )
 
 // Status - determine the actual status
@@ -12,6 +14,7 @@ type StatusInfo struct {
 	status         Status
 	firstStart     bool
 	restartCounter int
+	pidusage       *util.PidUsage
 	// read-write lock
 	mu sync.RWMutex
 }
@@ -72,16 +75,18 @@ func (inst *Instance) getRestartCounter() int {
 }
 
 // getCPUUsage - stat current process' CPU time
-func (inst *Instance) getCPUUsage() float64 {
-	// only running instance could get CPU Info
+func (inst *Instance) getPidUsage(pid int) *util.PidStat {
+	s := inst.status
+	// only running instance could get Pid Usage
 	if inst.getStatus() == StatusRunning {
-		// use specific code to read CPU usage
+		if s.pidusage != nil && s.pidusage.Pid == pid {
+			// get recent stat
+			return s.pidusage.GetStat()
+		}
+		// new pidUsage object
+		s.pidusage = util.NewPidUsage(pid)
+		return s.pidusage.GetStat()
 	}
 
-	return 0.0
-}
-
-// memory
-func (inst *Instance) getMemory() int64 {
-	return 0
+	return nil
 }

@@ -15,6 +15,8 @@ func main() {
 			normalRunHandler(args)
 		case "stop-on-time":
 			stopTimeoutHandler(args)
+		case "normal-with-cost":
+			normalWithCostHandler(args)
 		}
 	} else {
 		fmt.Println("[apm-test-helper] no command received")

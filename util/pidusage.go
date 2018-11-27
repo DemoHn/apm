@@ -16,10 +16,15 @@ import (
 
 // PidStat - pid stat result
 type PidStat struct {
-	PPid    int
-	Pid     int
-	CPU     float64
-	Memory  float64
+	// PPid = parent pid
+	PPid int
+	// Process actual pid
+	Pid int
+	// CPU time in ratio * cores
+	CPU float64
+	// Memory (maxrss) in bytes
+	Memory float64
+	// Elapsed time since process start in second
 	Elapsed float64
 }
 
@@ -32,14 +37,14 @@ type cpuTimeStat struct {
 
 // PidUsage - main
 type PidUsage struct {
-	pid        int
+	Pid        int
 	oldCPUStat *cpuTimeStat
 }
 
-// New - new PidUsage object
-func New(pid int) *PidUsage {
+// NewPidUsage - new PidUsage object
+func NewPidUsage(pid int) *PidUsage {
 	return &PidUsage{
-		pid: pid,
+		Pid: pid,
 	}
 }
 
@@ -67,11 +72,8 @@ func (usage *PidUsage) GetStat() *PidStat {
 func (usage *PidUsage) getStatOnNix() (*PidStat, error) {
 	// TODO - new method to make memory RSS more precise!
 	cpu := 0.0
-	if usage.oldCPUStat != nil {
-		// for the first time, cpu stat is null
 
-	}
-	nInfo, err := parseProcfile(usage.pid)
+	nInfo, err := parseProcfile(usage.Pid)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +108,7 @@ func (usage *PidUsage) getStatOnNix() (*PidStat, error) {
 	}
 	return &PidStat{
 		PPid:    int(nInfo.ppid),
-		Pid:     usage.pid,
+		Pid:     usage.Pid,
 		CPU:     cpu,
 		Memory:  nInfo.rss * cInfo.pageSize, // TODO: more precise calculation!
 		Elapsed: cInfo.uptime - nInfo.start/cInfo.clockTick,
@@ -179,7 +181,6 @@ func parseCPUInfo() (*procCPUInfo, error) {
 		return nil, err
 	}
 	uptime, _ := strconv.ParseFloat(strings.Split(string(uptimeFileBytes), " ")[0], 64)
-
 	clkTckStdout, err := exec.Command("getconf", "CLK_TCK").Output()
 	if err == nil {
 		clkTck, _ = strconv.ParseFloat(strings.Split(string(clkTckStdout), "\n")[0], 64)
