@@ -32,6 +32,12 @@ func Parse(args []string) error {
 			Flags:  stopFlags,
 			Action: stopHandler,
 		},
+		{
+			Name:   "list",
+			Usage:  "list current status of instance",
+			Flags:  listFlags,
+			Action: listHandler,
+		},
 	}
 
 	// parse and go

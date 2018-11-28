@@ -30,6 +30,37 @@ func (m *Master) findInstance(id int) (*instance.Instance, error) {
 	return nil, fmt.Errorf("[apm] instnace id(%d) not found", id)
 }
 
+// find instances by different filters
+func (m *Master) findInstancesByFilter(id *int, name *string) []*instance.Instance {
+	var insts = []*instance.Instance{}
+	// id as filter
+	if id != nil {
+		// get instance by ID
+		inst, err := m.findInstance(*id)
+		if err == nil {
+			insts = append(insts, inst)
+		}
+		return insts
+	}
+	// name as filter
+	if name != nil {
+		if instsList, ok := m.instances.nameMap[*name]; ok {
+			for _, instID := range instsList {
+				if inst, e := m.findInstance(instID); e == nil {
+					insts = append(insts, inst)
+				}
+			}
+		}
+		return insts
+	}
+
+	// list all instances
+	for _, inst := range m.instances.instanceMap {
+		insts = append(insts, inst)
+	}
+	return insts
+}
+
 func (m *Master) addInstance(name string, instance *instance.Instance) error {
 	if m.instances == nil {
 		return fmt.Errorf("master.instances not found! initInstanceMap() did executed?")

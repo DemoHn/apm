@@ -34,7 +34,6 @@ func (t *Tower) StartInstance(req *StartInstanceRequest, resp *StartInstanceResp
 
 // StopInstance -
 func (t *Tower) StopInstance(req *StopInstanceRequest, resp *StopInstanceResponse) error {
-	// TODO
 	master := t.master
 	inst, err := master.StopInstance(req.ID)
 	if err != nil {
@@ -51,5 +50,18 @@ func (t *Tower) StopInstance(req *StopInstanceRequest, resp *StopInstanceRespons
 		resp.InstanceID = e.Int(0)
 		resp.Error = e.String(2)
 	}
+	return nil
+}
+
+// ListInstance -
+func (t *Tower) ListInstance(req *ListInstanceRequest, resp *ListInstanceResponse) error {
+	master := t.master
+	var infos = []instance.Info{}
+	insts := master.GetInstancesByFilter(req)
+	for _, inst := range insts {
+		infos = append(infos, inst.GetInfo())
+	}
+
+	resp.InstanceInfos = infos
 	return nil
 }

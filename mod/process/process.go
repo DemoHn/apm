@@ -27,9 +27,9 @@ func (proc *Process) GetProcessState() *os.ProcessState {
 
 // GetPID - get PID of **running** process command
 func (proc *Process) GetPID() int {
-	procState := proc.Cmd.ProcessState
-	if procState != nil {
-		return procState.Pid()
+	osProc := proc.Cmd.Process
+	if osProc != nil {
+		return osProc.Pid
 	}
 	// if command is not found
 	return 0

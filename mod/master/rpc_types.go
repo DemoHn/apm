@@ -1,5 +1,9 @@
 package master
 
+import (
+	"github.com/DemoHn/apm/mod/instance"
+)
+
 // StartInstanceRequest defines the input parameters of `Tower.StartInstance`
 type StartInstanceRequest struct {
 	Name    string
@@ -25,4 +29,16 @@ type StopInstanceResponse struct {
 	ExitCode   int
 	Error      string
 	InstanceID int
+}
+
+// ListInstanceRequest defines the payload
+type ListInstanceRequest struct {
+	// ID - [optional]
+	ID   *int
+	Name *string
+}
+
+// ListInstanceResponse - response
+type ListInstanceResponse struct {
+	InstanceInfos []instance.Info
 }

@@ -90,6 +90,7 @@ func (inst *Instance) Run() {
 
 	inst.command = cmd
 	// auto-start
+	fmt.Println("cmd", cmd)
 	err = cmd.Start()
 	if err != nil {
 		eventHandle.sendEvent(ActionStart, inst, err)
@@ -145,10 +146,10 @@ func (inst *Instance) ForceStop() error {
 }
 
 // GetInfo - get current instance running information
-func (inst *Instance) GetInfo() *Info {
+func (inst *Instance) GetInfo() Info {
 	status := inst.status
 	command := inst.command
-	info := &Info{
+	info := Info{
 		ID:           inst.ID,
 		Name:         inst.Name,
 		Status:       status.getStatus(),

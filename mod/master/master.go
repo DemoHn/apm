@@ -80,6 +80,21 @@ func (m *Master) StopInstance(id int) (*instance.Instance, error) {
 	return inst, nil
 }
 
+// GetOneInstance - get instance
+func (m *Master) GetOneInstance(id int) *instance.Instance {
+	inst, err := m.findInstance(id)
+	if err != nil {
+		return nil
+	}
+
+	return inst
+}
+
+// GetInstancesByFilter -
+func (m *Master) GetInstancesByFilter(req *ListInstanceRequest) []*instance.Instance {
+	return m.findInstancesByFilter(req.ID, req.Name)
+}
+
 // Listen to the sockFile
 func (m *Master) Listen() error {
 	return m.listen()

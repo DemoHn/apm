@@ -12,6 +12,10 @@ var startFlags = []cli.Flag{
 		Name:  "cmd, c",
 		Usage: "program command to execute",
 	},
+	cli.StringFlag{
+		Name: "name",
+		Usage: "instance name",
+	},
 }
 
 func startHandler(c *cli.Context) error {
@@ -19,6 +23,7 @@ func startHandler(c *cli.Context) error {
 
 	req := &master.StartInstanceRequest{
 		Command: c.String("cmd"),
+		Name: c.String("name"),
 	}
 
 	err := sendRequest("Tower.StartInstance", req, &resp)
