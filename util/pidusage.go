@@ -23,7 +23,7 @@ type PidStat struct {
 	// CPU time in ratio * cores
 	CPU float64
 	// Memory (maxrss) in bytes
-	Memory float64
+	Memory int64
 	// Elapsed time since process start in second
 	Elapsed float64
 }
@@ -110,7 +110,7 @@ func (usage *PidUsage) getStatOnNix() (*PidStat, error) {
 		PPid:    int(nInfo.ppid),
 		Pid:     usage.Pid,
 		CPU:     cpu,
-		Memory:  nInfo.rss * cInfo.pageSize, // TODO: more precise calculation!
+		Memory:  int64(nInfo.rss * cInfo.pageSize), // TODO: more precise calculation!
 		Elapsed: cInfo.uptime - nInfo.start/cInfo.clockTick,
 	}, nil
 }

@@ -1,6 +1,7 @@
 module github.com/DemoHn/apm
 
 require (
+	github.com/AlekSi/pointer v1.0.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/franela/goblin v0.0.0-20181003173013-ead4ad1d2727
 	github.com/mdempsky/gocode v0.0.0-20181030163406-be88cde360c2 // indirect

@@ -44,7 +44,7 @@ func TestPidUsage(t *testing.T) {
 				pidStat.Pid,
 				pidStat.PPid,
 				pidStat.CPU,
-				int64(pidStat.Memory)/1000,
+				pidStat.Memory/1000,
 				pidStat.Elapsed)
 
 			g.Assert(pidStat.Pid).Eql(pid)

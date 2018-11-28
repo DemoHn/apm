@@ -29,11 +29,11 @@ func TestInstance(t *testing.T) {
 
 		g.After(func() {
 			// clean up instances
-			if instN.getStatus() == StatusRunning {
+			if instN.status.getStatus() == StatusRunning {
 				instN.ForceStop()
 			}
 
-			if instE.getStatus() == StatusRunning {
+			if instE.status.getStatus() == StatusRunning {
 				instE.ForceStop()
 			}
 		})
@@ -52,7 +52,7 @@ func TestInstance(t *testing.T) {
 		})
 
 		g.It("should get initial status", func() {
-			g.Assert(instN.getStatus()).Eql(StatusReady)
+			g.Assert(instN.status.getStatus()).Eql(StatusReady)
 		})
 		// start & stop
 		g.It("Run(): should start instance correctly", func() {
@@ -84,7 +84,7 @@ func TestInstance(t *testing.T) {
 		})
 
 		g.It("Stop(): should not stop twice", func() {
-			g.Assert(instN.getStatus()).Equal(StatusStopped)
+			g.Assert(instN.status.getStatus()).Equal(StatusStopped)
 			err := instN.Stop(syscall.SIGTERM)
 			g.Assert(err == nil).Equal(false)
 		})
@@ -94,7 +94,7 @@ func TestInstance(t *testing.T) {
 			go instN.Run()
 			<-instN.Once(ActionStart)
 
-			g.Assert(instN.getStatus()).Equal(StatusRunning)
+			g.Assert(instN.status.getStatus()).Equal(StatusRunning)
 			time.Sleep(50 * time.Millisecond)
 			// force again
 			err := instN.Stop(os.Interrupt)
@@ -107,7 +107,7 @@ func TestInstance(t *testing.T) {
 				// g.Assert(evt.Int(1)).Equal(0)
 			}
 
-			g.Assert(instN.getStatus()).Equal(StatusStopped)
+			g.Assert(instN.status.getStatus()).Equal(StatusStopped)
 		})
 	})
 }

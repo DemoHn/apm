@@ -6,12 +6,12 @@ import (
 	"github.com/DemoHn/apm/util"
 )
 
-// Status - determine the actual status
-type Status = string
+// StatusFlag - determine the actual status
+type StatusFlag = string
 
-// StatusInfo - get current status (including cpu, memory, restart time)
-type StatusInfo struct {
-	status         Status
+// Status - get current status (including cpu, memory, restart time)
+type Status struct {
+	flag           StatusFlag
 	firstStart     bool
 	restartCounter int
 	pidusage       *util.PidUsage
@@ -21,41 +21,38 @@ type StatusInfo struct {
 
 const (
 	// StatusReady - the instance has not started yet
-	StatusReady Status = "status_ready"
+	StatusReady StatusFlag = "status_ready"
 	// StatusRunning - the instance is running
-	StatusRunning Status = "status_running"
+	StatusRunning StatusFlag = "status_running"
 	// StatusStopped - the instance has stopped (by signal or program is down)
-	StatusStopped Status = "status_stopped"
+	StatusStopped StatusFlag = "status_stopped"
 )
 
-func initStatusInfo() *StatusInfo {
-	return &StatusInfo{
-		status:         StatusReady,
+func initStatus() *Status {
+	return &Status{
+		flag:           StatusReady,
 		firstStart:     false,
 		restartCounter: 0,
 	}
 }
 
 // getStatus
-func (inst *Instance) setStatus(status Status) {
-	s := inst.status
+func (s *Status) setStatus(flag StatusFlag) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.status = status
+	s.flag = flag
 }
 
-func (inst *Instance) getStatus() Status {
-	s := inst.status
+func (s *Status) getStatus() StatusFlag {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	return s.status
+	return s.flag
 }
 
 // restartCounter
-func (inst *Instance) addRestartCounter() {
-	s := inst.status
+func (s *Status) addRestartCounter() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -66,19 +63,17 @@ func (inst *Instance) addRestartCounter() {
 	}
 }
 
-func (inst *Instance) getRestartCounter() int {
-	s := inst.status
+func (s *Status) getRestartCounter() int {
 	s.mu.RLock()
 	defer s.mu.RLock()
 
-	return inst.status.restartCounter
+	return s.restartCounter
 }
 
-// getCPUUsage - stat current process' CPU time
-func (inst *Instance) getPidUsage(pid int) *util.PidStat {
-	s := inst.status
+// getPidUsage - stat current process' CPU time
+func (s *Status) getPidUsage(pid int) *util.PidStat {
 	// only running instance could get Pid Usage
-	if inst.getStatus() == StatusRunning {
+	if s.getStatus() == StatusRunning {
 		if s.pidusage != nil && s.pidusage.Pid == pid {
 			// get recent stat
 			return s.pidusage.GetStat()

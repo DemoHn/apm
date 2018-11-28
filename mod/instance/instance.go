@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"syscall"
 
+	"github.com/AlekSi/pointer"
+
 	"github.com/DemoHn/apm/mod/process"
 	"github.com/olebedev/emitter"
 )
@@ -23,10 +25,25 @@ type Instance struct {
 
 	// command - process object
 	command *process.Process
-	// status - instance status struct
-	status *StatusInfo
+	// state - instance status struct
+	status *Status
 	// event
 	eventHandle *EventHandle
+}
+
+// Info shows all informations
+type Info struct {
+	ID           int
+	Name         string
+	Status       StatusFlag
+	RestartTimes int
+	PID          *int
+	// CPU time - in ratio * core
+	CPU *float64
+	// Memory occupied - in bytes
+	Memory *int64
+	// LaunchTime - in seconds
+	LaunchTime *float64
 }
 
 // New apm instance (the basic unit of apm management, may contains multiple processes)
@@ -36,7 +53,7 @@ func New(path string, args []string) *Instance {
 		Args:        args,
 		eventHandle: newEventHandle(),
 		// initial status
-		status: initStatusInfo(),
+		status: initStatus(),
 	}
 }
 
@@ -56,9 +73,10 @@ func (inst *Instance) SetName(name string) {
 func (inst *Instance) Run() {
 	var err error
 
+	status := inst.status
 	eventHandle := inst.eventHandle
 	// status check
-	if inst.getStatus() == StatusRunning {
+	if status.getStatus() == StatusRunning {
 		err = fmt.Errorf("instance has already been started")
 		eventHandle.sendEvent(ActionStart, inst, err)
 		return
@@ -79,13 +97,14 @@ func (inst *Instance) Run() {
 	}
 
 	// send start event
-	inst.setStatus(StatusRunning)
+	status.setStatus(StatusRunning)
+	status.addRestartCounter()
 	eventHandle.sendEvent(ActionStart, inst, err)
 
 	err = cmd.Wait()
 	// if err = *exec.ExitError, that means the process returned
 	// with non-zero value
-	inst.setStatus(StatusStopped)
+	status.setStatus(StatusStopped)
 	if err == nil {
 		eventHandle.sendEvent(ActionStop, inst, nil, 0)
 		return
@@ -106,7 +125,8 @@ func (inst *Instance) Run() {
 // Notice: It will just send a SIGTERM signal to the running process
 // and will not stop it immediately.
 func (inst *Instance) Stop(signal os.Signal) error {
-	if inst.getStatus() != StatusRunning {
+	status := inst.status
+	if status.getStatus() != StatusRunning {
 		return fmt.Errorf("[apm] instance is not running, thus stop failed")
 	}
 	// send stop signal
@@ -116,14 +136,47 @@ func (inst *Instance) Stop(signal os.Signal) error {
 
 // ForceStop - stop the instnace by force
 func (inst *Instance) ForceStop() error {
-	if inst.getStatus() != StatusRunning {
+	status := inst.status
+	if status.getStatus() != StatusRunning {
 		return fmt.Errorf("[apm] instance is not running, thus forceStop failed")
 	}
 	err := inst.command.Kill()
 	return err
 }
 
+// GetInfo - get current instance running information
+func (inst *Instance) GetInfo() *Info {
+	status := inst.status
+	command := inst.command
+	info := &Info{
+		ID:           inst.ID,
+		Name:         inst.Name,
+		Status:       status.getStatus(),
+		RestartTimes: status.getRestartCounter(),
+		PID:          nil,
+		CPU:          nil,
+		Memory:       nil,
+		LaunchTime:   nil,
+	}
+
+	if status.getStatus() == StatusRunning {
+		// pid
+		var pid int
+		pid = command.GetPID()
+		info.PID = &pid
+
+		pidusage := status.getPidUsage(pid)
+		if pidusage != nil {
+			info.CPU = pointer.ToFloat64(pidusage.CPU)
+			info.Memory = pointer.ToInt64(pidusage.Memory)
+			info.LaunchTime = pointer.ToFloat64(pidusage.Elapsed)
+		}
+	}
+	return info
+}
+
 // Once - add listener to receive events
 func (inst *Instance) Once(topic string) <-chan Event {
-	return inst.eventHandle.Once(topic, emitter.Sync)
+	eventHandle := inst.eventHandle
+	return eventHandle.Once(topic, emitter.Sync)
 }
