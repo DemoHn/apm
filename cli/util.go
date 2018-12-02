@@ -1,6 +1,8 @@
 package cli
 
-import "net/rpc"
+import (
+	"net/rpc"
+)
 
 const (
 	sockFile = "/tmp/apm.sock"

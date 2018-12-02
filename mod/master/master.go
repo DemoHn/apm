@@ -58,10 +58,8 @@ func (m *Master) StartInstance(req *StartInstanceRequest) (*instance.Instance, e
 	if err2 != nil {
 		return nil, err2
 	}
-	// start instnace
-	go func() {
-		inst.Run()
-	}()
+	// start instnace - non-blocking
+	inst.Run()
 	return inst, nil
 }
 

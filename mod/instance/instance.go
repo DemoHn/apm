@@ -71,6 +71,13 @@ func (inst *Instance) SetName(name string) {
 
 // Run a instance with events registered
 func (inst *Instance) Run() {
+	go func() {
+		inst.spawnProcess()
+		inst.eventHandle.close()
+	}()
+}
+
+func (inst *Instance) spawnProcess() {
 	var err error
 
 	status := inst.status
@@ -117,9 +124,6 @@ func (inst *Instance) Run() {
 	} else {
 		eventHandle.sendEvent(ActionStop, inst, err)
 	}
-
-	// finish and cancel sendEvent() go-rountines
-	eventHandle.close()
 }
 
 // Stop - stop instance.
