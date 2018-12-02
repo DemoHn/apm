@@ -9,5 +9,12 @@ build:
 	mkdir -p bin
 	$(GOBUILD) -o bin/apm ./cmd/apm/main.go
 
+rebuild:
+	rm -f /tmp/apm.sock
+	mkdir -p bin
+	$(GOBUILD) -o bin/apm ./cmd/apm/main.go
+
+run:
+	./bin/apm daemon --debug true
 test: build-test-helper
 	go test -v ./...

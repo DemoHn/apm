@@ -10,15 +10,20 @@ import (
 	"github.com/urfave/cli"
 )
 
-var daemonFlags = []cli.Flag{}
+var daemonFlags = []cli.Flag{
+	cli.BoolFlag{
+		Name:  "debug,d",
+		Usage: "debug mode",
+	},
+}
 
 func daemonHandler(c *cli.Context) error {
 	var err error
 	// signal
 	quit := make(chan os.Signal)
-
+	debugMode := c.Bool("debug")
 	// create & init master
-	m := master.New()
+	m := master.New(debugMode)
 	err = m.Init(sockFile)
 	if err != nil {
 		return err

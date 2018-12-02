@@ -10,7 +10,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-const stringNA = "N/A"
+const stringNA = "-"
 
 var listFlags = []cli.Flag{
 	cli.StringFlag{

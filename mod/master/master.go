@@ -1,15 +1,17 @@
 package master
 
 import (
-	"sync"
 	"syscall"
 
 	"github.com/DemoHn/apm/mod/instance"
 	"github.com/DemoHn/apm/util"
+	// loggers
+	"github.com/DemoHn/apm/mod/logger"
 )
 
 // Master - the only one master that controls all instances
 type Master struct {
+	debugMode bool
 	rpc       *rpcServer
 	instances *instanceMap
 }
@@ -17,14 +19,12 @@ type Master struct {
 var master *Master
 
 // New -
-func New() *Master {
-	var once sync.Once
-	once.Do(func() {
-		if master == nil {
-			master = &Master{}
-		}
-	})
-
+func New(debugMode bool) *Master {
+	master = &Master{
+		debugMode: debugMode,
+	}
+	// new global logger
+	logger.Init(debugMode)
 	return master
 }
 

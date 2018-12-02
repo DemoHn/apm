@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/AlekSi/pointer"
-
+	"github.com/DemoHn/apm/mod/logger"
 	"github.com/DemoHn/apm/mod/process"
 	"github.com/olebedev/emitter"
 )
@@ -31,6 +31,8 @@ type Instance struct {
 	eventHandle *EventHandle
 }
 
+var log *logger.Logger
+
 // Info shows all informations
 type Info struct {
 	ID           int
@@ -48,6 +50,7 @@ type Info struct {
 
 // New apm instance (the basic unit of apm management, may contains multiple processes)
 func New(path string, args []string) *Instance {
+	log = logger.Get()
 	return &Instance{
 		Path:        path,
 		Args:        args,
@@ -97,9 +100,10 @@ func (inst *Instance) spawnProcess() {
 
 	inst.command = cmd
 	// auto-start
-	fmt.Println("cmd", cmd)
+	log.Debugf("[apm] ID(%d) going to start", inst.ID)
 	err = cmd.Start()
 	if err != nil {
+		log.Debugf("[apm] ID(%d) start failed err=%s", inst.ID, err)
 		eventHandle.sendEvent(ActionStart, inst, err)
 		return
 	}
@@ -108,15 +112,19 @@ func (inst *Instance) spawnProcess() {
 	status.setStatus(StatusRunning)
 	status.addRestartCounter()
 	eventHandle.sendEvent(ActionStart, inst, err)
-
+	log.Debugf("[apm] ID(%d) instance is running", inst.ID)
 	err = cmd.Wait()
 	// if err = *exec.ExitError, that means the process returned
 	// with non-zero value
+	log.Debugf("[apm] ID(%d) going to stop", inst.ID)
 	status.setStatus(StatusStopped)
 	if err == nil {
+		log.Debugf("[apm] ID(%d) stop succeed", inst.ID)
 		eventHandle.sendEvent(ActionStop, inst, nil, 0)
 		return
 	}
+
+	log.Debugf("[apm] ID(%d) stop with err=%s", inst.ID, err)
 	if exitError, ok := err.(*exec.ExitError); ok {
 		ws := exitError.Sys().(syscall.WaitStatus)
 		exitCode := ws.ExitStatus()
@@ -132,7 +140,7 @@ func (inst *Instance) spawnProcess() {
 func (inst *Instance) Stop(signal os.Signal) error {
 	status := inst.status
 	if status.getStatus() != StatusRunning {
-		return fmt.Errorf("[apm] instance is not running, thus stop failed")
+		return fmt.Errorf("instance is not running, thus stop failed")
 	}
 	// send stop signal
 	err := inst.command.Stop(signal)
@@ -143,7 +151,7 @@ func (inst *Instance) Stop(signal os.Signal) error {
 func (inst *Instance) ForceStop() error {
 	status := inst.status
 	if status.getStatus() != StatusRunning {
-		return fmt.Errorf("[apm] instance is not running, thus forceStop failed")
+		return fmt.Errorf("instance is not running, thus forceStop failed")
 	}
 	err := inst.command.Kill()
 	return err
@@ -164,7 +172,7 @@ func (inst *Instance) GetInfo() Info {
 		LaunchTime:   nil,
 	}
 
-	if status.getStatus() == StatusRunning {
+	if info.Status == StatusRunning {
 		// pid
 		var pid int
 		pid = command.GetPID()

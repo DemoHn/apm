@@ -3,11 +3,20 @@ package instance
 import (
 	"sync"
 
+	"github.com/DemoHn/apm/mod/logger"
 	"github.com/DemoHn/apm/util"
+	deadlock "github.com/sasha-s/go-deadlock"
 )
 
 // StatusFlag - determine the actual status
 type StatusFlag = string
+
+type rwLocker interface {
+	Lock()
+	Unlock()
+	RLock()
+	RUnlock()
+}
 
 // Status - get current status (including cpu, memory, restart time)
 type Status struct {
@@ -16,7 +25,7 @@ type Status struct {
 	restartCounter int
 	pidusage       *util.PidUsage
 	// read-write lock
-	mu sync.RWMutex
+	mu rwLocker
 }
 
 const (
@@ -29,11 +38,18 @@ const (
 )
 
 func initStatus() *Status {
-	return &Status{
+	s := &Status{
 		flag:           StatusReady,
 		firstStart:     false,
 		restartCounter: 0,
 	}
+
+	if logger.DebugMode() {
+		s.mu = new(deadlock.RWMutex)
+	} else {
+		s.mu = new(sync.RWMutex)
+	}
+	return s
 }
 
 // getStatus
@@ -65,7 +81,7 @@ func (s *Status) addRestartCounter() {
 
 func (s *Status) getRestartCounter() int {
 	s.mu.RLock()
-	defer s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	return s.restartCounter
 }

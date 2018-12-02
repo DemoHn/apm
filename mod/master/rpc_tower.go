@@ -39,7 +39,6 @@ func (t *Tower) StopInstance(req *StopInstanceRequest, resp *StopInstanceRespons
 	if err != nil {
 		return err
 	}
-
 	select {
 	case e := <-inst.Once(instance.ActionStop):
 		resp.IsSuccess = true
