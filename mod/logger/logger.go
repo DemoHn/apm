@@ -12,6 +12,16 @@ var gDebugMode bool
 
 // Init - init an instance
 func Init(debugMode bool) *Logger {
+	if gLogger != nil {
+		// update level
+		if debugMode {
+			gLogger.SetLevel(logrus.DebugLevel)
+		} else {
+			gLogger.SetLevel(logrus.WarnLevel)
+		}
+		return gLogger
+	}
+	// if not inited
 	logger := logrus.New()
 
 	logger.SetFormatter(&logrus.TextFormatter{
