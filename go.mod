@@ -16,4 +16,5 @@ require (
 	github.com/urfave/cli v1.20.0
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2 // indirect
 	golang.org/x/tools v0.0.0-20181030221726-6c7e314b6563 // indirect
+	gopkg.in/yaml.v2 v2.2.2
 )

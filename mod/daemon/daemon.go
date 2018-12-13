@@ -29,10 +29,9 @@ func StartDaemon(debugMode bool) {
 		return
 	}
 	defer cntxt.Release()
-	log.Info("[apm] daemon started")
 
 	err2 := daemonHandler(debugMode)
 	if err2 != nil {
-		log.Error("[apm] error to start daemon:", err)
+		log.Error("[apm] error to start:", err)
 	}
 }
