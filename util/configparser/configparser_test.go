@@ -99,5 +99,31 @@ c: d`
 			v2, _ := config.Find("c")
 			g.Assert(v2).Equal("d")
 		})
+
+		g.It("should replace dep macro", func() {
+			var data = `
+apm: apmName
+bpm: bpm
+merchant.rootDir: /var/www/$(apm)/$(bpm)
+merchant.lockFile: $(apm)/exp.lock`
+
+			parserFunc := func(key string, value interface{}) interface{} {
+				if key == "apm" {
+					return "apmapm"
+				}
+				return value
+			}
+			config.SetMacroParser(parserFunc)
+			config.LoadFromData([]byte(data))
+
+			v1, _ := config.Find("apm")
+			g.Assert(v1).Equal("apmapm")
+
+			v2, _ := config.Find("merchant.rootDir")
+			g.Assert(v2).Equal("/var/www/apmapm/bpm")
+
+			v3, _ := config.Find("merchant.lockFile")
+			g.Assert(v3).Equal("apmapm/exp.lock")
+		})
 	})
 }

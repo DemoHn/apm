@@ -11,6 +11,7 @@ var gConfig *Config
 
 // default config
 var defaultConfig = map[string]interface{}{
+	// put global.dir at beginning!
 	"global.dir":      "${HOME}/.apm",
 	"global.sockFile": "$(global.dir)/apm.sock",
 	"global.pidFile":  "$(global.dir)/apm.pid",

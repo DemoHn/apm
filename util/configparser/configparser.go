@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 )
 
 // MacroParserFunc - macro parser function
@@ -86,6 +87,41 @@ func (config *Config) Find(key string) (result interface{}, err error) {
 	return
 }
 
+// resolveDepConfig -
+// to support configValue like `$(<var name>)`
+// e.g.:
+// global.dir = /var/www
+// global.sockFile = $(global.dir)/apm.sock -> global.sockFile = /var/www/apm.sock
+func (config *Config) resolveDepConfig() {
+
+	for k, v := range config.configItem {
+		// only work for string item
+		if strValue, ok := v.(string); ok {
+			config.configItem[k] = config.mutateConfigValue(strValue)
+		}
+	}
+}
+
+func (config *Config) mutateConfigValue(oldValue string) string {
+	re := regexp.MustCompile("\\$\\(([a-zA-Z0-9\\.]+)\\)")
+
+	return re.ReplaceAllStringFunc(oldValue, func(key string) string {
+		// get rawKey first
+		// rawKey = $1, e.g.: key = $(config.dir), rawKey = config.dir
+		rawKey := re.FindStringSubmatch(key)[1]
+		// if corresponding key has found and it's a string
+		// return the replaced value, otherwise return the original.
+		if newValue, err := config.Find(rawKey); err == nil {
+			if newValueStr, ok := newValue.(string); ok {
+				return newValueStr
+			}
+			return oldValue
+		}
+
+		return oldValue
+	})
+}
+
 // parseConfig - parse config from data
 func (config *Config) parseConfig(data []byte) (err error) {
 	switch config.configType {
@@ -95,6 +131,8 @@ func (config *Config) parseConfig(data []byte) (err error) {
 			if err != nil {
 				return err
 			}
+
+			config.resolveDepConfig()
 			return nil
 		}
 	}
