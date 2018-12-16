@@ -1,6 +1,9 @@
 package config
 
 import (
+	"os"
+	"regexp"
+
 	"github.com/DemoHn/apm/util/configparser"
 )
 
@@ -22,12 +25,22 @@ var defaultConfig = map[string]interface{}{
 func Init(configDir *string) *Config {
 	if gConfig == nil {
 		config := configparser.New("yaml")
-		config.LoadDefault(defaultConfig)
+		// set macro parser
+		config.SetMacroParser(func(key string, item interface{}) interface{} {
+			// replace $HOME -> <homeDir>
+			re := regexp.MustCompile("\\$\\{HOME\\}")
+			// if item is string to replace
+			if itemStr, ok := item.(string); ok {
+				return re.ReplaceAllString(itemStr, os.Getenv("HOME"))
+			}
 
+			return item
+		})
+
+		config.LoadDefault(defaultConfig)
 		if configDir != nil {
 			config.Load(*configDir)
 		}
-
 		gConfig = config
 	}
 

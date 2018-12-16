@@ -6,12 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/DemoHn/apm/mod/config"
 	"github.com/DemoHn/apm/mod/master"
-)
-
-// tmp usage
-const (
-	sockFile = "/tmp/apm.sock"
 )
 
 // handle daemon
@@ -19,8 +15,13 @@ func daemonHandler(debugMode bool) error {
 	var err error
 	// signal
 	quit := make(chan os.Signal)
+	// get config instance
+	configN := config.Get()
 	// create & init master
 	m := master.New(debugMode)
+
+	// sockFile
+	sockFile, _ := configN.FindString("global.sockFile")
 	err = m.Init(sockFile)
 	if err != nil {
 		return err

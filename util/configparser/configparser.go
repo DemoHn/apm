@@ -21,6 +21,7 @@ type Config struct {
 func New(configType string) *Config {
 	return &Config{
 		configType: configType,
+		configItem: map[string]interface{}{},
 		macroParser: func(key string, item interface{}) interface{} {
 			// default macroParser, just return the original value
 			return item
@@ -73,6 +74,9 @@ func (config *Config) LoadDefault(defaultConf map[string]interface{}) {
 	for k, v := range defaultConf {
 		config.configItem[k] = v
 	}
+
+	config.executeMacro()
+	config.resolveDepConfig()
 }
 
 // Find - find config value from key.
@@ -85,6 +89,20 @@ func (config *Config) Find(key string) (result interface{}, err error) {
 
 	err = fmt.Errorf("Config key `%s` not found", key)
 	return
+}
+
+// FindString - find config value and convert it to string
+func (config *Config) FindString(key string) (string, error) {
+	val, err := config.Find(key)
+	if err != nil {
+		return "", err
+	}
+
+	if valStr, ok := val.(string); ok {
+		return valStr, nil
+	}
+
+	return "", fmt.Errorf("Config key `%s` is not a string value", key)
 }
 
 // resolveDepConfig -
@@ -122,16 +140,23 @@ func (config *Config) mutateConfigValue(oldValue string) string {
 	})
 }
 
+func (config *Config) executeMacro() {
+	for k, v := range config.configItem {
+		config.configItem[k] = config.macroParser(k, v)
+	}
+}
+
 // parseConfig - parse config from data
 func (config *Config) parseConfig(data []byte) (err error) {
 	switch config.configType {
 	case "yaml":
 		{
-			config.configItem, err = ParseYamlConfig(data, config.macroParser)
+			config.configItem, err = ParseYamlConfig(data)
 			if err != nil {
 				return err
 			}
 
+			config.executeMacro()
 			config.resolveDepConfig()
 			return nil
 		}

@@ -1,20 +1,35 @@
 package daemon
 
 import (
+	"os"
+
+	"github.com/DemoHn/apm/mod/config"
 	"github.com/DemoHn/apm/mod/logger"
 	"github.com/sevlyar/go-daemon"
 )
 
 // StartDaemon - start the main daemon
 func StartDaemon(debugMode bool) {
+	// init config
+	configN := config.Init(nil)
 	// init logger
 	log := logger.Init(debugMode)
 
+	// init globalDir
+	globalDir, _ := configN.FindString("global.dir")
+	errM := os.MkdirAll(globalDir, os.ModePerm)
+	if errM != nil {
+		log.Error(errM)
+	}
+
+	// init logFile & pidFile
+	pidFile, _ := configN.FindString("global.pidFile")
+	logFile, _ := configN.FindString("global.logFile")
 	// init context
 	cntxt := &daemon.Context{
-		PidFileName: "pid",
+		PidFileName: pidFile,
 		PidFilePerm: 0644,
-		LogFileName: "log",
+		LogFileName: logFile,
 		LogFilePerm: 0640,
 		WorkDir:     "./",
 		Umask:       027,

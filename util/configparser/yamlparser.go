@@ -10,7 +10,7 @@ type yamlMap = map[interface{}]interface{}
 type yamlArray = []interface{}
 
 // ParseYamlConfig - read data while type=YAML
-func ParseYamlConfig(data []byte, macroParser MacroParserFunc) (map[string]interface{}, error) {
+func ParseYamlConfig(data []byte) (map[string]interface{}, error) {
 	m := make(yamlMap)
 
 	err := yaml.Unmarshal([]byte(data), &m)
@@ -21,9 +21,6 @@ func ParseYamlConfig(data []byte, macroParser MacroParserFunc) (map[string]inter
 	configItems := make(map[string]interface{})
 	flattenYamlMap("", m, &configItems)
 
-	for k, v := range configItems {
-		configItems[k] = macroParser(k, v)
-	}
 	return configItems, nil
 }
 
