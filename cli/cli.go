@@ -38,6 +38,12 @@ func Parse(args []string) error {
 			Flags:  listFlags,
 			Action: listHandler,
 		},
+		{
+			Name:   "kill",
+			Usage:  "kill apm daemon",
+			Flags:  killFlags,
+			Action: killHandler,
+		},
 	}
 
 	// parse and go
