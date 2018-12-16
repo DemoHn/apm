@@ -24,7 +24,7 @@ type Instance struct {
 	Args []string
 
 	// command - process object
-	command *process.Process
+	command process.IProcess
 	// state - instance status struct
 	status *Status
 	// event

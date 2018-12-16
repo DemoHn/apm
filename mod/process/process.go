@@ -6,8 +6,19 @@ import (
 	"os/exec"
 )
 
+// IProcess - general Process Interface
+type IProcess interface {
+	GetPID() int
+	Start() error
+	Stop(os.Signal) error
+	Kill() error
+	IsExited() bool
+}
+
 // Process wraps and standardize the actual *exec.Cmd object
 type Process struct {
+	// Cmd - currently we are using the standard lib
+	// maybe replace to our version later [TODO]
 	*exec.Cmd
 }
 
@@ -20,11 +31,6 @@ func New(name string, args ...string) *Process {
 	}
 }
 
-// GetProcessState -
-func (proc *Process) GetProcessState() *os.ProcessState {
-	return proc.Cmd.ProcessState
-}
-
 // GetPID - get PID of **running** process command
 func (proc *Process) GetPID() int {
 	osProc := proc.Cmd.Process
@@ -33,6 +39,11 @@ func (proc *Process) GetPID() int {
 	}
 	// if command is not found
 	return 0
+}
+
+// Start - start the command
+func (proc *Process) Start() error {
+	return proc.Cmd.Start()
 }
 
 // Stop - send linux signal to stop the process

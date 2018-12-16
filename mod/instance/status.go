@@ -23,7 +23,7 @@ type Status struct {
 	flag           StatusFlag
 	firstStart     bool
 	restartCounter int
-	pidusage       *util.PidUsage
+	pidusage       util.IPidUsage
 	// read-write lock
 	mu rwLocker
 }
@@ -90,7 +90,7 @@ func (s *Status) getRestartCounter() int {
 func (s *Status) getPidUsage(pid int) *util.PidStat {
 	// only running instance could get Pid Usage
 	if s.getStatus() == StatusRunning {
-		if s.pidusage != nil && s.pidusage.Pid == pid {
+		if s.pidusage != nil && s.pidusage.GetPid() == pid {
 			// get recent stat
 			return s.pidusage.GetStat()
 		}

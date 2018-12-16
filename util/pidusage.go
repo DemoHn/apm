@@ -11,6 +11,18 @@ import (
 	"strings"
 )
 
+// IPidUsage - interface for pid usage
+type IPidUsage interface {
+	GetStat() *PidStat
+	GetPid() int
+}
+
+// PidUsage - main
+type PidUsage struct {
+	Pid        int
+	oldCPUStat *cpuTimeStat
+}
+
 // ref: https://github.com/soyuka/pidusage
 // Current State: only support *ix!
 
@@ -33,12 +45,6 @@ type cpuTimeStat struct {
 	stime  float64
 	utime  float64
 	uptime float64
-}
-
-// PidUsage - main
-type PidUsage struct {
-	Pid        int
-	oldCPUStat *cpuTimeStat
 }
 
 // NewPidUsage - new PidUsage object
@@ -65,6 +71,11 @@ func (usage *PidUsage) GetStat() *PidStat {
 	}
 	log.Printf("OS:%s is not supported to get stat now!", runtime.GOOS)
 	return nil
+}
+
+// GetPid - get current pid
+func (usage *PidUsage) GetPid() int {
+	return usage.Pid
 }
 
 // internal functions
