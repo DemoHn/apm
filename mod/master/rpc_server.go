@@ -1,7 +1,7 @@
 package master
 
 import (
-	"fmt"
+	"context"
 	"net"
 	"net/http"
 	"net/rpc"
@@ -18,37 +18,34 @@ type rpcServer struct {
 	httpServer *http.Server
 }
 
-func (m *Master) initRPC(sockFile string) error {
+func (m *Master) initRPC(sockFile string) (*rpcServer, error) {
 	var err error
 	tower := &Tower{
 		master: m,
 	}
 	err = rpc.Register(tower)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	rpc.HandleHTTP()
-	m.rpc = &rpcServer{
+	rpcN := &rpcServer{
 		sockFile:   sockFile,
 		httpServer: &http.Server{},
 	}
-	return nil
+	return rpcN, nil
 }
 
-func (m *Master) listen() error {
+func (r *rpcServer) Listen() error {
 	var l net.Listener
 	var err error
-	if m.rpc == nil {
-		return fmt.Errorf("Listen to server failed - is master.rpc initialized?")
-	}
 
-	l, err = net.Listen(unixNetwork, m.rpc.sockFile)
+	l, err = net.Listen(unixNetwork, r.sockFile)
 	if err != nil {
 		return err
 	}
 
-	err = m.rpc.httpServer.Serve(l)
+	err = r.httpServer.Serve(l)
 	if err != nil {
 		return err
 	}
@@ -56,7 +53,6 @@ func (m *Master) listen() error {
 	return nil
 }
 
-func (m *Master) shutdown() error {
-	// TODO - shutdown logic
-	return nil
+func (r *rpcServer) Shutdown() error {
+	return r.httpServer.Shutdown(context.Background())
 }

@@ -1,10 +1,7 @@
-apm:
-  runtime_dir:
-    $HOME/.apm
-  tower:
-    type: tcp
-    host: 127.0.0.1
-    port: 12306
+global:
+  dir: ${HOME}/.apm
+  sockFile: $(global.dir)/apm.sock
+  logFile: $(global.dir)/apm.log
 apps:
   - name: Hong Kong Journalist
     command: go run main.go

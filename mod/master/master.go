@@ -1,12 +1,15 @@
 package master
 
 import (
+	"fmt"
+	"os"
 	"syscall"
 
 	"github.com/DemoHn/apm/mod/instance"
 	"github.com/DemoHn/apm/util"
 
 	// loggers
+	"github.com/DemoHn/apm/mod/config"
 	"github.com/DemoHn/apm/mod/logger"
 )
 
@@ -33,7 +36,7 @@ func New(debugMode bool) *Master {
 func (m *Master) Init(sockFile string) error {
 	var err error
 	// init RPC first
-	err = m.initRPC(sockFile)
+	m.rpc, err = m.initRPC(sockFile)
 	if err != nil {
 		return err
 	}
@@ -96,10 +99,29 @@ func (m *Master) GetInstancesByFilter(req *ListInstanceRequest) []*instance.Inst
 
 // Listen to the sockFile
 func (m *Master) Listen() error {
-	return m.listen()
+	return m.rpc.Listen()
 }
 
-// Shutdown -
-func (m *Master) Shutdown() error {
-	return nil
+// Teardown - teardown data
+func (m *Master) Teardown() error {
+	var err error
+
+	configN := config.Get()
+	if configN == nil {
+		return fmt.Errorf("config instance is null")
+	}
+
+	sockFile, _ := configN.FindString("global.sockFile")
+	pidFile, _ := configN.FindString("global.pidFile")
+	// 1. stop all instances - TODO
+	// 2. close the RPC server
+	if err = m.rpc.Shutdown(); err != nil {
+		return err
+	}
+	// 3. delete sockFile
+	if err = os.Remove(sockFile); err != nil {
+		return err
+	}
+	// 4. delete pidFile
+	return os.Remove(pidFile)
 }

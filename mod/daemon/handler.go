@@ -1,12 +1,12 @@
 package daemon
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/DemoHn/apm/mod/config"
+	"github.com/DemoHn/apm/mod/logger"
 	"github.com/DemoHn/apm/mod/master"
 )
 
@@ -17,32 +17,34 @@ func daemonHandler(debugMode bool) error {
 	quit := make(chan os.Signal)
 	// get config instance
 	configN := config.Get()
+	log := logger.Get()
+
 	// create & init master
-	m := master.New(debugMode)
+	masterN := master.New(debugMode)
 
 	// sockFile
 	sockFile, _ := configN.FindString("global.sockFile")
-	err = m.Init(sockFile)
+	err = masterN.Init(sockFile)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		err = m.Listen()
+		err = masterN.Listen()
 		if err != nil {
-			fmt.Println("[apm] server encounters an error:", err)
+			log.Error("[apm] server encounters an error:", err)
 			// send quit signal
 			quit <- os.Interrupt
 		}
 	}()
 
-	fmt.Println("[apm] listening to server")
+	log.Info("[apm] listening to server")
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	// wait for quit signal
 	<-quit
 
-	fmt.Println("[apm] going to shutdown")
-	err = m.Shutdown()
+	log.Info("[apm] going to teardown")
+	err = masterN.Teardown()
 	if err != nil {
 		return err
 	}

@@ -47,6 +47,6 @@ func StartDaemon(debugMode bool) {
 
 	err2 := daemonHandler(debugMode)
 	if err2 != nil {
-		log.Error("[apm] error to start:", err)
+		log.Error("[apm] error:", err)
 	}
 }
