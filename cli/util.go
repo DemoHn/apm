@@ -2,13 +2,14 @@ package cli
 
 import (
 	"net/rpc"
-)
 
-const (
-	sockFile = "/tmp/apm.sock"
+	"github.com/DemoHn/apm/mod/config"
 )
 
 func sendRequest(method string, input interface{}, output interface{}) error {
+	configN := config.Init(nil)
+	sockFile, _ := configN.FindString("global.sockFile")
+
 	client, err := rpc.DialHTTP("unix", sockFile)
 	if err != nil {
 		return err

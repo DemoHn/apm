@@ -9,8 +9,7 @@ build:
 	mkdir -p bin
 	$(GOBUILD) -o bin/apm ./cmd/apm/main.go
 
-rebuild:
-	rm -f /tmp/apm.sock
+rebuild:	
 	mkdir -p bin
 	$(GOBUILD) -o bin/apm ./cmd/apm/main.go
 
