@@ -1,8 +1,7 @@
 package cli
 
 import (
-	"fmt"
-
+	"github.com/DemoHn/apm/mod/logger"
 	"github.com/DemoHn/apm/mod/master"
 	"github.com/urfave/cli"
 )
@@ -13,7 +12,7 @@ var startFlags = []cli.Flag{
 		Usage: "program command to execute",
 	},
 	cli.StringFlag{
-		Name: "name",
+		Name:  "name",
 		Usage: "instance name",
 	},
 }
@@ -21,9 +20,11 @@ var startFlags = []cli.Flag{
 func startHandler(c *cli.Context) error {
 	var resp master.StartInstanceResponse
 
+	log := logger.Init(false)
+
 	req := &master.StartInstanceRequest{
 		Command: c.String("cmd"),
-		Name: c.String("name"),
+		Name:    c.String("name"),
 	}
 
 	err := sendRequest("Tower.StartInstance", req, &resp)
@@ -31,9 +32,9 @@ func startHandler(c *cli.Context) error {
 		return err
 	}
 	if resp.IsSuccess == true {
-		fmt.Printf("[apm] start instance success - ID = %d, pid = %d", resp.InstanceID, resp.PID)
+		log.Infof("[apm] start instance success - ID = %d, pid = %d", resp.InstanceID, resp.PID)
 	} else {
-		fmt.Printf("[apm] start instance failed - error: %s", resp.Error)
+		log.Infof("[apm] start instance failed - error: %s", resp.Error)
 	}
 	return nil
 }

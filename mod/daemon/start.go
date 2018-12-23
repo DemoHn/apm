@@ -24,8 +24,7 @@ func Start(debugMode bool) error {
 	}
 
 	// make directory
-	err = os.MkdirAll(globalDir, os.ModePerm)
-	if err != nil {
+	if err = os.MkdirAll(globalDir, os.ModePerm); err != nil {
 		return err
 	}
 
@@ -63,6 +62,12 @@ func Start(debugMode bool) error {
 	defer cntxt.Release()
 
 	// CHILD PROCESS
+	return daemonHandler(debugMode)
+}
+
+// StartForeground - start the apm apm daemon on foreground
+// This is usually for debugging the program
+func StartForeground(debugMode bool) error {
 	return daemonHandler(debugMode)
 }
 

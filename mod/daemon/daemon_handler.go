@@ -16,7 +16,7 @@ func daemonHandler(debugMode bool) error {
 	quit := make(chan os.Signal)
 
 	// get config instance
-	configN := config.Get()
+	configN := config.Init(nil)
 	log := logger.Init(debugMode)
 
 	// create master object
@@ -25,12 +25,12 @@ func daemonHandler(debugMode bool) error {
 	// get sockFile configlet
 	var sockFile string
 	if sockFile, err = configN.FindString("global.sockFile"); err != nil {
-		return err
+		return errWithLog(err)
 	}
 
 	// init master
 	if err = masterN.Init(sockFile); err != nil {
-		return err
+		return errWithLog(err)
 	}
 
 	go func() {
@@ -52,9 +52,21 @@ func daemonHandler(debugMode bool) error {
 	// 2. parent process receives a SIGTERM signal
 	// Thus if err != nil, `quit` must happens on condition #1
 	if err != nil {
-		return err
+		return errWithLog(err)
 	}
 
 	log.Info("[apm] going to teardown")
-	return masterN.Teardown()
+	if err = masterN.Teardown(); err != nil {
+		return errWithLog(err)
+	}
+
+	return nil
+}
+
+// internal functions
+func errWithLog(err error) error {
+	// notice log must be inited before
+	log := logger.Get()
+	log.Errorf("[apm] %s", err.Error())
+	return err
 }

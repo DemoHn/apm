@@ -18,6 +18,7 @@ var killFlags = []cli.Flag{
 }
 
 func killHandler(c *cli.Context) error {
+	var err error
 	// get param
 	var force = c.Bool("force")
 
@@ -25,21 +26,21 @@ func killHandler(c *cli.Context) error {
 	configN := config.Init(nil)
 	log := logger.Init(false)
 
-	pidFile, err := configN.FindString("global.pidFile")
-	if err != nil {
+	var pidFile string
+	if pidFile, err = configN.FindString("global.pidFile"); err != nil {
 		return err
 	}
 
 	// read pidFile
-	pidData, errR := ioutil.ReadFile(pidFile)
-	if errR != nil {
-		return errR
+	var pidData []byte
+	if pidData, err = ioutil.ReadFile(pidFile); err != nil {
+		return err
 	}
 
 	// parse to int
-	pid, errT := strconv.Atoi(string(pidData))
-	if errT != nil {
-		return errT
+	var pid int
+	if pid, err = strconv.Atoi(string(pidData)); err != nil {
+		return err
 	}
 
 	// send quit signal (if exists)
@@ -47,11 +48,10 @@ func killHandler(c *cli.Context) error {
 		return syscall.Kill(pid, syscall.SIGKILL)
 	}
 
-	errK := syscall.Kill(pid, syscall.SIGTERM)
-	if errK != nil {
-		return errK
+	if err = syscall.Kill(pid, syscall.SIGTERM); err != nil {
+		return err
 	}
 
-	log.Infof("[apm] kill PID:%d success", pid)
+	log.Infof("[apm] kill apm daemon (PID:%d) success", pid)
 	return nil
 }

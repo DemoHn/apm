@@ -7,18 +7,18 @@ import (
 )
 
 func sendRequest(method string, input interface{}, output interface{}) error {
+	var err error
 	configN := config.Init(nil)
-	sockFile, _ := configN.FindString("global.sockFile")
 
-	client, err := rpc.DialHTTP("unix", sockFile)
-	if err != nil {
+	var sockFile string
+	if sockFile, err = configN.FindString("global.sockFile"); err != nil {
 		return err
 	}
 
-	err2 := client.Call(method, input, output)
-	if err2 != nil {
-		return err2
+	var client *rpc.Client
+	if client, err = rpc.DialHTTP("unix", sockFile); err != nil {
+		return err
 	}
 
-	return nil
+	return client.Call(method, input, output)
 }

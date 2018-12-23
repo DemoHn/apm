@@ -1,9 +1,8 @@
 package cli
 
 import (
-	"fmt"
-
 	"github.com/DemoHn/apm/mod/master"
+	"github.com/DemoHn/apm/mod/logger"
 	"github.com/urfave/cli"
 )
 
@@ -16,20 +15,21 @@ var stopFlags = []cli.Flag{
 
 func stopHandler(c *cli.Context) error {
 	var resp master.StopInstanceResponse
+	var err error
 
+	log := logger.Init(false)
 	req := &master.StopInstanceRequest{
 		ID: c.Int("id"),
 	}
 
-	err := sendRequest("Tower.StopInstance", req, &resp)
-	if err != nil {
+	if err = sendRequest("Tower.StopInstance", req, &resp); err != nil {
 		return err
 	}
 
 	if resp.IsSuccess == true {
-		fmt.Printf("[apm] stop instance success - ID = %d, code = %d", resp.InstanceID, resp.ExitCode)
+		log.Infof("[apm] stop instance success - ID = %d, code = %d", resp.InstanceID, resp.ExitCode)
 	} else {
-		fmt.Printf("[apm] stop instance error - error = %s", resp.Error)
+		log.Infof("[apm] stop instance error - error = %s", resp.Error)
 	}
 	return nil
 }

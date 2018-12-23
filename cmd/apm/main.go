@@ -4,11 +4,14 @@ import (
 	"os"
 
 	"github.com/DemoHn/apm/cli"
+	"github.com/DemoHn/apm/mod/logger"
 )
 
 func main() {
-	err := cli.Parse(os.Args)
-	if err != nil {
-		panic(err)
+	var err error
+	log := logger.Init(false)
+
+	if err = cli.Parse(os.Args); err != nil {
+		log.Errorf("%s", err.Error())
 	}
 }
