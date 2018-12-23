@@ -13,9 +13,10 @@ var daemonFlags = []cli.Flag{
 }
 
 func daemonHandler(c *cli.Context) error {
+	var err error
 
 	debugMode := c.Bool("debug")
 	// create & init master
-	daemon.StartDaemon(debugMode)
-	return nil
+	err = daemon.Start(debugMode)
+	return err
 }

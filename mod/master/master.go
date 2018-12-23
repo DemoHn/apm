@@ -111,17 +111,12 @@ func (m *Master) Teardown() error {
 		return fmt.Errorf("config instance is null")
 	}
 
-	sockFile, _ := configN.FindString("global.sockFile")
 	pidFile, _ := configN.FindString("global.pidFile")
 	// 1. stop all instances - TODO
 	// 2. close the RPC server
 	if err = m.rpc.Shutdown(); err != nil {
 		return err
 	}
-	// 3. delete sockFile
-	if err = os.Remove(sockFile); err != nil {
-		return err
-	}
-	// 4. delete pidFile
+	// 3. delete pidFile
 	return os.Remove(pidFile)
 }

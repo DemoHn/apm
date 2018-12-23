@@ -17,7 +17,7 @@ func Init(debugMode bool) *Logger {
 		if debugMode {
 			gLogger.SetLevel(logrus.DebugLevel)
 		} else {
-			gLogger.SetLevel(logrus.WarnLevel)
+			gLogger.SetLevel(logrus.InfoLevel)
 		}
 		return gLogger
 	}
@@ -33,7 +33,7 @@ func Init(debugMode bool) *Logger {
 	if debugMode {
 		logger.SetLevel(logrus.DebugLevel)
 	} else {
-		logger.SetLevel(logrus.WarnLevel)
+		logger.SetLevel(logrus.InfoLevel)
 	}
 	gLogger = logger
 	gDebugMode = debugMode
