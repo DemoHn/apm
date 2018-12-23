@@ -40,17 +40,11 @@ func (r *rpcServer) Listen() error {
 	var l net.Listener
 	var err error
 
-	l, err = net.Listen(unixNetwork, r.sockFile)
-	if err != nil {
+	if l, err = net.Listen(unixNetwork, r.sockFile); err != nil {
 		return err
 	}
 
-	err = r.httpServer.Serve(l)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return r.httpServer.Serve(l)
 }
 
 func (r *rpcServer) Shutdown() error {

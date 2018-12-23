@@ -70,22 +70,25 @@ func (m *Master) StartInstance(req *StartInstanceRequest) (*instance.Instance, e
 // StopInstance - stop instance
 // Notice: still should wait for
 func (m *Master) StopInstance(id int) (*instance.Instance, error) {
-	inst, err := m.findInstance(id)
-	if err != nil {
+	var err error
+	var inst *instance.Instance
+	if inst, err = m.findInstance(id); err != nil {
 		return nil, err
 	}
 
-	err2 := inst.Stop(syscall.SIGTERM)
-	if err2 != nil {
-		return nil, err2
+	if err = inst.Stop(syscall.SIGTERM); err != nil {
+		return nil, err
 	}
+
 	return inst, nil
 }
 
 // GetOneInstance - get instance
 func (m *Master) GetOneInstance(id int) *instance.Instance {
-	inst, err := m.findInstance(id)
-	if err != nil {
+	var err error
+	var inst *instance.Instance
+
+	if inst, err = m.findInstance(id); err != nil {
 		return nil
 	}
 
@@ -105,13 +108,16 @@ func (m *Master) Listen() error {
 // Teardown - teardown data
 func (m *Master) Teardown() error {
 	var err error
+	var configN *config.Config
 
-	configN := config.Get()
-	if configN == nil {
+	if configN = config.Get(); configN == nil {
 		return fmt.Errorf("config instance is null")
 	}
 
-	pidFile, _ := configN.FindString("global.pidFile")
+	var pidFile string
+	if pidFile, err = configN.FindString("global.pidFile"); err != nil {
+		return err
+	}
 	// 1. stop all instances - TODO
 	// 2. close the RPC server
 	if err = m.rpc.Shutdown(); err != nil {
