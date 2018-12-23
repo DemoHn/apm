@@ -22,13 +22,13 @@ type Instance struct {
 	Path string
 	// Args - command arguments
 	Args []string
-
+	// AutoRestart - enable "AutoRestart" feature or not
+	AutoRestart bool
 	// command - process object
-	command process.IProcess
-	// state - instance status struct
-	status *Status
-	// event
-	eventHandle *EventHandle
+	command           process.IProcess
+	status            *Status
+	eventHandle       *EventHandle
+	autoRestartHandle *AutoRestartHandle
 }
 
 var log *logger.Logger
@@ -51,13 +51,19 @@ type Info struct {
 // New apm instance (the basic unit of apm management, may contains multiple processes)
 func New(path string, args []string) *Instance {
 	log = logger.Get()
-	return &Instance{
+	inst := &Instance{
 		Path:        path,
 		Args:        args,
 		eventHandle: newEventHandle(),
+		// TODO: more config
+		AutoRestart: true,
 		// initial status
-		status: initStatus(),
+		status:            initStatus(),
+		autoRestartHandle: newAutoRestartHandle(true),
 	}
+
+	inst.autoRestartHandle.setInstance(inst)
+	return inst
 }
 
 // setters
@@ -79,12 +85,14 @@ func (inst *Instance) Run() {
 		inst.eventHandle.close()
 	}()
 }
-
 func (inst *Instance) spawnProcess() {
 	var err error
 
 	status := inst.status
 	eventHandle := inst.eventHandle
+	autoRestartHandle := inst.autoRestartHandle
+
+	autoRestartHandle.unmask()
 	// status check
 	if status.getStatus() == StatusRunning {
 		err = fmt.Errorf("instance has already been started")
@@ -114,10 +122,11 @@ func (inst *Instance) spawnProcess() {
 	eventHandle.sendEvent(ActionStart, inst, err)
 	log.Debugf("[apm] ID(%d) instance is running", inst.ID)
 	err = cmd.Wait()
-	// if err = *exec.ExitError, that means the process returned
-	// with non-zero value
+
 	log.Debugf("[apm] ID(%d) going to stop", inst.ID)
 	status.setStatus(StatusStopped)
+	autoRestartHandle.tick()
+
 	if err == nil {
 		log.Debugf("[apm] ID(%d) stop succeed", inst.ID)
 		eventHandle.sendEvent(ActionStop, inst, nil, 0)
@@ -125,6 +134,8 @@ func (inst *Instance) spawnProcess() {
 	}
 
 	log.Debugf("[apm] ID(%d) stop with err=%s", inst.ID, err)
+	// if err = *exec.ExitError, that means the process returned
+	// with non-zero value
 	if exitError, ok := err.(*exec.ExitError); ok {
 		ws := exitError.Sys().(syscall.WaitStatus)
 		exitCode := ws.ExitStatus()
@@ -138,6 +149,7 @@ func (inst *Instance) spawnProcess() {
 // Notice: It will just send a SIGTERM signal to the running process
 // and will not stop it immediately.
 func (inst *Instance) Stop(signal os.Signal) error {
+	inst.autoRestartHandle.mask()
 	status := inst.status
 	if status.getStatus() != StatusRunning {
 		return fmt.Errorf("instance is not running, thus stop failed")
@@ -149,6 +161,7 @@ func (inst *Instance) Stop(signal os.Signal) error {
 
 // ForceStop - stop the instnace by force
 func (inst *Instance) ForceStop() error {
+	inst.autoRestartHandle.mask()
 	status := inst.status
 	if status.getStatus() != StatusRunning {
 		return fmt.Errorf("instance is not running, thus forceStop failed")
