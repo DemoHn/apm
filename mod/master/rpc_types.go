@@ -8,6 +8,7 @@ import (
 type StartInstanceRequest struct {
 	Name    string
 	Command string
+	ID      *int
 }
 
 // StartInstanceResponse defines the reply of `Tower.StartInstance`

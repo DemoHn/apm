@@ -15,16 +15,25 @@ var startFlags = []cli.Flag{
 		Name:  "name",
 		Usage: "instance name",
 	},
+	cli.IntFlag{
+		Name:  "id",
+		Usage: "existing instance ID to start",
+	},
 }
 
 func startHandler(c *cli.Context) error {
 	var resp master.StartInstanceResponse
-
+	var id int = c.Int("id")
+	var rid *int
 	log := logger.Init(false)
 
+	if id != 0 {
+		rid = &id
+	}
 	req := &master.StartInstanceRequest{
 		Command: c.String("cmd"),
 		Name:    c.String("name"),
+		ID:      rid,
 	}
 
 	err := sendRequest("Tower.StartInstance", req, &resp)

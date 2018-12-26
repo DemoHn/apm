@@ -12,10 +12,21 @@ type Tower struct {
 
 // StartInstance - create & run an instance
 func (t *Tower) StartInstance(req *StartInstanceRequest, resp *StartInstanceResponse) error {
+	var err error
+	var inst *instance.Instance
+
 	master := t.master
-	inst, err := master.StartInstance(req)
-	if err != nil {
-		return err
+	// If ID not nil, the first priority is to start existing instance
+	if req.ID != nil {
+		if inst, err = master.findInstance(*req.ID); err != nil {
+			return err
+		}
+		inst.Run()
+	} else {
+		// start **new** instance
+		if inst, err = master.StartInstance(req); err != nil {
+			return err
+		}
 	}
 
 	select {

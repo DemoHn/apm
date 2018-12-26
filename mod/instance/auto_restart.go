@@ -15,15 +15,17 @@ type AutoRestartHandle struct {
 	// This is to prevent restart too frequent
 	interval time.Duration
 	// the original instance
-	instance *Instance
-	maskLock bool
-	mu       sync.RWMutex
+	instance    *Instance
+	maskLock    bool
+	restartLock bool
+	mu          sync.RWMutex
 }
 
 func newAutoRestartHandle() *AutoRestartHandle {
 	return &AutoRestartHandle{
-		interval: defaultInterval,
-		maskLock: false,
+		interval:    defaultInterval,
+		maskLock:    false,
+		restartLock: false,
 	}
 }
 
@@ -35,7 +37,9 @@ func (ar *AutoRestartHandle) setInterval(interval time.Duration) {
 // Tick - trigger restart operation
 func (ar *AutoRestartHandle) tick(inst *Instance) {
 	autoRestart := inst.AutoRestart
-	if autoRestart {
+	if autoRestart || ar.restartLock {
+		// release restart lock
+		ar.unforceRestart()
 		go func() {
 			<-time.After(ar.interval)
 			if ar.maskLock == false {
@@ -63,4 +67,18 @@ func (ar *AutoRestartHandle) unmask() {
 	defer ar.mu.Unlock()
 
 	ar.maskLock = false
+}
+
+func (ar *AutoRestartHandle) forceRestart() {
+	ar.mu.Lock()
+	defer ar.mu.Unlock()
+
+	ar.restartLock = true
+}
+
+func (ar *AutoRestartHandle) unforceRestart() {
+	ar.mu.Lock()
+	defer ar.mu.Unlock()
+
+	ar.restartLock = false
 }
