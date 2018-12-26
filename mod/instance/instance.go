@@ -59,10 +59,9 @@ func New(path string, args []string) *Instance {
 		AutoRestart: true,
 		// initial status
 		status:            initStatus(),
-		autoRestartHandle: newAutoRestartHandle(true),
+		autoRestartHandle: newAutoRestartHandle(),
 	}
 
-	inst.autoRestartHandle.setInstance(inst)
 	return inst
 }
 
@@ -92,7 +91,6 @@ func (inst *Instance) spawnProcess() {
 	eventHandle := inst.eventHandle
 	autoRestartHandle := inst.autoRestartHandle
 
-	autoRestartHandle.unmask()
 	// status check
 	if status.getStatus() == StatusRunning {
 		err = fmt.Errorf("instance has already been started")
@@ -107,12 +105,15 @@ func (inst *Instance) spawnProcess() {
 	cmd.Stderr = os.Stderr
 
 	inst.command = cmd
-	// auto-start
+	// unmark to enable auto-restart again
+	autoRestartHandle.unmask()
+
 	log.Debugf("[apm] ID(%d) going to start", inst.ID)
 	err = cmd.Start()
 	if err != nil {
 		log.Debugf("[apm] ID(%d) start failed err=%s", inst.ID, err)
 		eventHandle.sendEvent(ActionStart, inst, err)
+		autoRestartHandle.tick(inst)
 		return
 	}
 
@@ -125,8 +126,8 @@ func (inst *Instance) spawnProcess() {
 
 	log.Debugf("[apm] ID(%d) going to stop", inst.ID)
 	status.setStatus(StatusStopped)
-	autoRestartHandle.tick()
 
+	autoRestartHandle.tick(inst)
 	if err == nil {
 		log.Debugf("[apm] ID(%d) stop succeed", inst.ID)
 		eventHandle.sendEvent(ActionStop, inst, nil, 0)
@@ -149,23 +150,19 @@ func (inst *Instance) spawnProcess() {
 // Notice: It will just send a SIGTERM signal to the running process
 // and will not stop it immediately.
 func (inst *Instance) Stop(signal os.Signal) error {
-	inst.autoRestartHandle.mask()
-	status := inst.status
-	if status.getStatus() != StatusRunning {
-		return fmt.Errorf("instance is not running, thus stop failed")
-	}
+	autoRestartHandle := inst.autoRestartHandle
+
 	// send stop signal
+	autoRestartHandle.mask()
 	err := inst.command.Stop(signal)
 	return err
 }
 
 // ForceStop - stop the instnace by force
 func (inst *Instance) ForceStop() error {
-	inst.autoRestartHandle.mask()
-	status := inst.status
-	if status.getStatus() != StatusRunning {
-		return fmt.Errorf("instance is not running, thus forceStop failed")
-	}
+	autoRestartHandle := inst.autoRestartHandle
+
+	autoRestartHandle.mask()
 	err := inst.command.Kill()
 	return err
 }
