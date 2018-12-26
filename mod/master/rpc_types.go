@@ -32,6 +32,18 @@ type StopInstanceResponse struct {
 	InstanceID int
 }
 
+// RestartInstanceRequest defines the input parameters of `Tower.StopInstance`
+type RestartInstanceRequest struct {
+	ID int
+}
+
+// RestartInstanceResponse defines the reply of `Tower.StopInstance`
+type RestartInstanceResponse struct {
+	IsSuccess  bool
+	Error      string
+	InstanceID int
+}
+
 // ListInstanceRequest defines the payload
 type ListInstanceRequest struct {
 	// ID - [optional]

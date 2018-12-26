@@ -33,6 +33,12 @@ func Parse(args []string) error {
 			Action: stopHandler,
 		},
 		{
+			Name:   "restart",
+			Usage:  "restart the instance of assigned ID",
+			Flags:  restartFlags,
+			Action: restartHandler,
+		},
+		{
 			Name:   "list",
 			Usage:  "list current status of instance",
 			Flags:  listFlags,

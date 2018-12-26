@@ -63,6 +63,28 @@ func (t *Tower) StopInstance(req *StopInstanceRequest, resp *StopInstanceRespons
 	return nil
 }
 
+// RestartInstance -
+func (t *Tower) RestartInstance(req *RestartInstanceRequest, resp *RestartInstanceResponse) error {
+	var inst *instance.Instance
+	var err error
+	master := t.master
+
+	if inst, err = master.RestartInstance(req.ID); err != nil {
+		return err
+	}
+
+	select {
+	case e := <-inst.Once(instance.ActionStop):
+		resp.IsSuccess = true
+		resp.InstanceID = e.Int(0)
+	case e := <-inst.Once(instance.ActionError):
+		resp.IsSuccess = false
+		resp.InstanceID = e.Int(0)
+		resp.Error = e.String(2)
+	}
+	return nil
+}
+
 // ListInstance -
 func (t *Tower) ListInstance(req *ListInstanceRequest, resp *ListInstanceResponse) error {
 	master := t.master

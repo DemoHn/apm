@@ -63,8 +63,8 @@ func (m *Master) StartInstance(req *StartInstanceRequest) (*instance.Instance, e
 		return nil, err2
 	}
 	// start instnace - non-blocking
-	inst.Run()
-	return inst, nil
+	e := inst.Run()
+	return inst, e
 }
 
 // StopInstance - stop instance
@@ -77,6 +77,21 @@ func (m *Master) StopInstance(id int) (*instance.Instance, error) {
 	}
 
 	if err = inst.Stop(syscall.SIGTERM); err != nil {
+		return nil, err
+	}
+
+	return inst, nil
+}
+
+// RestartInstance - find & restart instance
+func (m *Master) RestartInstance(id int) (*instance.Instance, error) {
+	var err error
+	var inst *instance.Instance
+	if inst, err = m.findInstance(id); err != nil {
+		return nil, err
+	}
+
+	if err = inst.Restart(syscall.SIGTERM); err != nil {
 		return nil, err
 	}
 

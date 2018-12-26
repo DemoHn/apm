@@ -79,16 +79,20 @@ func (inst *Instance) SetName(name string) {
 
 // Run a instance with events registered
 func (inst *Instance) Run() error {
-	autoRestartHandle := inst.autoRestartHandle
+	/*autoRestartHandle := inst.autoRestartHandle
 	status := inst.status
-	if inst.AutoRestart || autoRestartHandle.restartLock || status.getStatus() == StatusRunning {
-		return fmt.Errorf("duplicate Run()")
-	} else {
-		go func() {
-			inst.spawnProcess()
-			inst.eventHandle.close()
-		}()
-	}
+
+		autoRestartOn := inst.AutoRestart || autoRestartHandle.restartLock
+		if autoRestartOn && status.getStatus() != StatusReady ||
+			!autoRestartOn && status.getStatus() == StatusRunning {
+			return fmt.Errorf("duplicate Run()")
+		}*/
+	go func() {
+		inst.spawnProcess()
+		inst.eventHandle.close()
+	}()
+
+	return nil
 }
 func (inst *Instance) spawnProcess() {
 	var err error
@@ -164,7 +168,7 @@ func (inst *Instance) Stop(signal os.Signal) error {
 	return err
 }
 
-// ForceStop - stop the instnace by force
+// ForceStop - stop the instance by force
 func (inst *Instance) ForceStop() error {
 	autoRestartHandle := inst.autoRestartHandle
 
@@ -173,6 +177,7 @@ func (inst *Instance) ForceStop() error {
 	return err
 }
 
+// Restart - restart the instance
 func (inst *Instance) Restart(signal os.Signal) error {
 	autoRestartHandle := inst.autoRestartHandle
 	// acquire restart lock to make auto-restart work by force

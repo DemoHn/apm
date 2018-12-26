@@ -1,8 +1,9 @@
 package instance
 
 import (
-	"sync"
 	"time"
+
+	deadlock "github.com/sasha-s/go-deadlock"
 )
 
 const (
@@ -18,7 +19,7 @@ type AutoRestartHandle struct {
 	instance    *Instance
 	maskLock    bool
 	restartLock bool
-	mu          sync.RWMutex
+	mu          rwLocker
 }
 
 func newAutoRestartHandle() *AutoRestartHandle {
@@ -26,6 +27,7 @@ func newAutoRestartHandle() *AutoRestartHandle {
 		interval:    defaultInterval,
 		maskLock:    false,
 		restartLock: false,
+		mu:          new(deadlock.RWMutex),
 	}
 }
 
@@ -37,9 +39,15 @@ func (ar *AutoRestartHandle) setInterval(interval time.Duration) {
 // Tick - trigger restart operation
 func (ar *AutoRestartHandle) tick(inst *Instance) {
 	autoRestart := inst.AutoRestart
-	if autoRestart || ar.restartLock {
+	if ar.restartLock {
 		// release restart lock
 		ar.unforceRestart()
+		// start instance immediately
+		inst.Run()
+		return
+	}
+	// else
+	if autoRestart {
 		go func() {
 			<-time.After(ar.interval)
 			if ar.maskLock == false {
