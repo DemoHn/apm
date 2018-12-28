@@ -1,10 +1,20 @@
-package cli
+package main
 
 import (
 	"github.com/DemoHn/apm/infra/logger"
 	"github.com/DemoHn/apm/mod/master"
 	"github.com/urfave/cli"
 )
+
+// StartCmd -
+func StartCmd(name string) cli.Command {
+	return cli.Command{
+		Name:   name,
+		Usage:  "create & start the instance",
+		Flags:  startFlags,
+		Action: startHandler,
+	}
+}
 
 var startFlags = []cli.Flag{
 	cli.StringFlag{

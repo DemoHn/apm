@@ -1,4 +1,4 @@
-package cli
+package main
 
 import (
 	"os"
@@ -9,6 +9,16 @@ import (
 	"github.com/DemoHn/tablewriter"
 	"github.com/urfave/cli"
 )
+
+// ListCmd -
+func ListCmd(name string) cli.Command {
+	return cli.Command{
+		Name:   name,
+		Usage:  "list current status of instance",
+		Flags:  listFlags,
+		Action: listHandler,
+	}
+}
 
 const stringNA = "-"
 

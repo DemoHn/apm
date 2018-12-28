@@ -1,10 +1,20 @@
-package cli
+package main
 
 import (
 	"github.com/DemoHn/apm/infra/logger"
 	"github.com/DemoHn/apm/mod/daemon"
 	"github.com/urfave/cli"
 )
+
+// DaemonCmd - handling daemon
+func DaemonCmd(name string) cli.Command {
+	return cli.Command{
+		Name:   name,
+		Usage:  "start the daemon",
+		Flags:  daemonFlags,
+		Action: daemonHandler,
+	}
+}
 
 var daemonFlags = []cli.Flag{
 	cli.BoolFlag{
@@ -21,7 +31,7 @@ func daemonHandler(c *cli.Context) error {
 	var err error
 
 	// logger with debugMode = false
-	log := logger.Init(false)
+	log := logger.Get()
 	debugMode := c.Bool("debug")
 	fg := c.Bool("foreground")
 

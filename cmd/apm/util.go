@@ -1,4 +1,4 @@
-package cli
+package main
 
 import (
 	"net/rpc"
@@ -8,7 +8,7 @@ import (
 
 func sendRequest(method string, input interface{}, output interface{}) error {
 	var err error
-	configN := config.Init(nil)
+	configN := config.Get()
 
 	var sockFile string
 	if sockFile, err = configN.FindString("global.sockFile"); err != nil {

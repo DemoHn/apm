@@ -7,11 +7,7 @@ build-test-helper:
 
 build:
 	mkdir -p bin
-	$(GOBUILD) -o bin/apm ./cmd/apm/main.go
-
-rebuild:	
-	mkdir -p bin
-	$(GOBUILD) -o bin/apm ./cmd/apm/main.go
+	$(GOBUILD) -o bin/apm ./cmd/apm
 
 run:
 	./bin/apm daemon --debug true
