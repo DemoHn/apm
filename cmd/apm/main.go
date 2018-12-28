@@ -4,12 +4,12 @@ import (
 	"os"
 
 	"github.com/DemoHn/apm/cli"
-	"github.com/DemoHn/apm/infra/logger"
+	"github.com/DemoHn/apm/infra"
 )
 
 func main() {
 	var err error
-	log := logger.Init(false)
+	_, log := infra.Init(nil, false)
 
 	if err = cli.Parse(os.Args); err != nil {
 		log.Errorf("%s", err.Error())
