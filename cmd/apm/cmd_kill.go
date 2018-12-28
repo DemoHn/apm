@@ -1,4 +1,4 @@
-package cli
+package main
 
 import (
 	"io/ioutil"
@@ -9,6 +9,16 @@ import (
 	"github.com/DemoHn/apm/infra/logger"
 	"github.com/urfave/cli"
 )
+
+// KillCmd -
+func KillCmd(name string) cli.Command {
+	return cli.Command{
+		Name:   "kill",
+		Usage:  "kill apm daemon",
+		Flags:  killFlags,
+		Action: killHandler,
+	}
+}
 
 var killFlags = []cli.Flag{
 	cli.BoolFlag{

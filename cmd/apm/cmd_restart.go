@@ -1,10 +1,20 @@
-package cli
+package main
 
 import (
 	"github.com/DemoHn/apm/infra/logger"
 	"github.com/DemoHn/apm/mod/master"
 	"github.com/urfave/cli"
 )
+
+// RestartCmd -
+func RestartCmd(name string) cli.Command {
+	return cli.Command{
+		Name:   "restart",
+		Usage:  "restart the instance of assigned ID",
+		Flags:  restartFlags,
+		Action: restartHandler,
+	}
+}
 
 var restartFlags = []cli.Flag{
 	cli.StringFlag{

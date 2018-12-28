@@ -1,10 +1,20 @@
-package cli
+package main
 
 import (
 	"github.com/DemoHn/apm/infra/logger"
 	"github.com/DemoHn/apm/mod/master"
 	"github.com/urfave/cli"
 )
+
+// StopCmd -
+func StopCmd(name string) cli.Command {
+	return cli.Command{
+		Name:   name,
+		Usage:  "stop the instance of assigned ID",
+		Flags:  stopFlags,
+		Action: stopHandler,
+	}
+}
 
 var stopFlags = []cli.Flag{
 	cli.StringFlag{
