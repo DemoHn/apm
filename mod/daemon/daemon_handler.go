@@ -5,8 +5,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/DemoHn/apm/mod/config"
-	"github.com/DemoHn/apm/mod/logger"
+	"github.com/DemoHn/apm/infra/config"
+	"github.com/DemoHn/apm/infra/logger"
 	"github.com/DemoHn/apm/mod/master"
 )
 

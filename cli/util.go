@@ -3,7 +3,7 @@ package cli
 import (
 	"net/rpc"
 
-	"github.com/DemoHn/apm/mod/config"
+	"github.com/DemoHn/apm/infra/config"
 )
 
 func sendRequest(method string, input interface{}, output interface{}) error {
