@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/DemoHn/apm/mod/config"
-	"github.com/DemoHn/apm/mod/logger"
-	"github.com/sevlyar/go-daemon"
+	"github.com/DemoHn/apm/infra/config"
+	"github.com/DemoHn/apm/infra/logger"
+	daemon "github.com/sevlyar/go-daemon"
 )
 
 // Start - start the main daemon

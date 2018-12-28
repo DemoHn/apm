@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/DemoHn/apm/mod/config"
-	"github.com/DemoHn/apm/mod/logger"
+	"github.com/DemoHn/apm/infra/config"
+	"github.com/DemoHn/apm/infra/logger"
 	"github.com/urfave/cli"
 )
 

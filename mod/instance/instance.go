@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/AlekSi/pointer"
-	"github.com/DemoHn/apm/mod/logger"
+	"github.com/DemoHn/apm/infra/logger"
 	"github.com/DemoHn/apm/mod/process"
 	"github.com/olebedev/emitter"
 )

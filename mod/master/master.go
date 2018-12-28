@@ -9,8 +9,8 @@ import (
 	"github.com/DemoHn/apm/util"
 
 	// loggers
-	"github.com/DemoHn/apm/mod/config"
-	"github.com/DemoHn/apm/mod/logger"
+	"github.com/DemoHn/apm/infra/config"
+	"github.com/DemoHn/apm/infra/logger"
 )
 
 // Master - the only one master that controls all instances

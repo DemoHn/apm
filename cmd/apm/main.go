@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/DemoHn/apm/cli"
-	"github.com/DemoHn/apm/mod/logger"
+	"github.com/DemoHn/apm/infra/logger"
 )
 
 func main() {

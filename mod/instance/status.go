@@ -3,7 +3,7 @@ package instance
 import (
 	"sync"
 
-	"github.com/DemoHn/apm/mod/logger"
+	"github.com/DemoHn/apm/infra/logger"
 	"github.com/DemoHn/apm/util"
 	deadlock "github.com/sasha-s/go-deadlock"
 )
