@@ -35,7 +35,7 @@ func startHandler(c *cli.Context) error {
 	var resp master.StartInstanceResponse
 	var id int = c.Int("id")
 	var rid *int
-	log := logger.Init(false)
+	log := logger.Get()
 
 	if id != 0 {
 		rid = &id

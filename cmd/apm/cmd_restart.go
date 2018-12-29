@@ -27,7 +27,7 @@ func restartHandler(c *cli.Context) error {
 	var resp master.RestartInstanceResponse
 	var err error
 
-	log := logger.Init(false)
+	log := logger.Get()
 	req := &master.RestartInstanceRequest{
 		ID: c.Int("id"),
 	}

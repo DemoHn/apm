@@ -33,7 +33,7 @@ func TestEvent(t *testing.T) {
 			var evt emitter.Event
 			var timeout = false
 			go func() {
-				inst.Run()
+				inst.Start()
 			}()
 			defer inst.ForceStop()
 
@@ -59,7 +59,7 @@ func TestEvent(t *testing.T) {
 			var evt emitter.Event
 			var timeout = false
 			go func() {
-				newInst.Run()
+				newInst.Start()
 			}()
 
 			select {
@@ -92,7 +92,7 @@ func TestEvent(t *testing.T) {
 			nInst.ID = 400
 
 			go func() {
-				nInst.Run()
+				nInst.Start()
 			}()
 
 			select {
@@ -133,7 +133,7 @@ func TestEvent(t *testing.T) {
 			nInst.ID = 401
 
 			go func() {
-				nInst.Run()
+				nInst.Start()
 			}()
 
 			select {
@@ -162,7 +162,7 @@ func TestEvent(t *testing.T) {
 			nInst.ID = 402
 
 			go func() {
-				nInst.Run()
+				nInst.Start()
 			}()
 
 			select {

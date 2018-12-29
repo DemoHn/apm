@@ -55,8 +55,8 @@ func TestInstance(t *testing.T) {
 			g.Assert(instN.status.getStatus()).Eql(StatusReady)
 		})
 		// start & stop
-		g.It("Run(): should start instance correctly", func() {
-			go instN.Run()
+		g.It("Start(): should start instance correctly", func() {
+			go instN.Start()
 			select {
 			case evt := <-instN.Once(ActionStart):
 				g.Assert(evt.Int(0)).Equal(instNID)
@@ -64,8 +64,8 @@ func TestInstance(t *testing.T) {
 			}
 		})
 
-		g.It("Run(): should not start an instance twice", func() {
-			go instN.Run()
+		g.It("Start(): should not start an instance twice", func() {
+			go instN.Start()
 			select {
 			case evt := <-instN.Once(ActionError):
 				g.Assert(evt.Int(0)).Equal(instNID)
@@ -91,7 +91,7 @@ func TestInstance(t *testing.T) {
 
 		g.It("ForceStop(): should forceKill successfully", func() {
 			// start again
-			go instN.Run()
+			go instN.Start()
 			<-instN.Once(ActionStart)
 
 			g.Assert(instN.status.getStatus()).Equal(StatusRunning)
