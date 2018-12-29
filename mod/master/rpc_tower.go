@@ -21,7 +21,7 @@ func (t *Tower) StartInstance(req *StartInstanceRequest, resp *StartInstanceResp
 		if inst, err = master.findInstance(*req.ID); err != nil {
 			return err
 		}
-		inst.Run()
+		inst.Start()
 	} else {
 		// start **new** instance
 		if inst, err = master.StartInstance(req); err != nil {

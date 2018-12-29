@@ -36,18 +36,12 @@ func New(debugMode bool) *Master {
 func (m *Master) Init(sockFile string) error {
 	var err error
 	// init RPC first
-	m.rpc, err = m.initRPC(sockFile)
-	if err != nil {
+	if m.rpc, err = m.initRPC(sockFile); err != nil {
 		return err
 	}
 
 	// init instance map to add/del instances
-	err = m.initInstanceMap()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return m.initInstanceMap()
 }
 
 // StartInstance - create & start instance
@@ -63,7 +57,7 @@ func (m *Master) StartInstance(req *StartInstanceRequest) (*instance.Instance, e
 		return nil, err2
 	}
 	// start instnace - non-blocking
-	e := inst.Run()
+	e := inst.Start()
 	return inst, e
 }
 

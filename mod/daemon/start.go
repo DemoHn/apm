@@ -13,9 +13,9 @@ import (
 func Start(debugMode bool) error {
 	var err error
 
-	// init gObjects
-	configN := config.Init(nil)
-	log := logger.Init(debugMode)
+	// since init has been done in cmd init
+	configN := config.Get()
+	log := logger.Get()
 
 	// fetch globalDir
 	var globalDir string

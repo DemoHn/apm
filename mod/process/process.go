@@ -10,6 +10,7 @@ import (
 type IProcess interface {
 	GetPID() int
 	Start() error
+	Wait() error
 	Stop(os.Signal) error
 	Kill() error
 	IsExited() bool

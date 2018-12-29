@@ -5,7 +5,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/DemoHn/apm/infra/config"
+	"github.com/DemoHn/apm/infra"
 	"github.com/DemoHn/apm/infra/logger"
 	"github.com/DemoHn/apm/mod/master"
 )
@@ -16,8 +16,7 @@ func daemonHandler(debugMode bool) error {
 	quit := make(chan os.Signal)
 
 	// get config instance
-	configN := config.Init(nil)
-	log := logger.Init(debugMode)
+	configN, log := infra.Init(nil, debugMode)
 
 	// create master object
 	masterN := master.New(debugMode)

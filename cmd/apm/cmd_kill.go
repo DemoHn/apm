@@ -33,8 +33,8 @@ func killHandler(c *cli.Context) error {
 	var force = c.Bool("force")
 
 	// read config
-	configN := config.Init(nil)
-	log := logger.Init(false)
+	configN := config.Get()
+	log := logger.Get()
 
 	var pidFile string
 	if pidFile, err = configN.FindString("global.pidFile"); err != nil {

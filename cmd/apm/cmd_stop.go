@@ -27,7 +27,7 @@ func stopHandler(c *cli.Context) error {
 	var resp master.StopInstanceResponse
 	var err error
 
-	log := logger.Init(false)
+	log := logger.Get()
 	req := &master.StopInstanceRequest{
 		ID: c.Int("id"),
 	}

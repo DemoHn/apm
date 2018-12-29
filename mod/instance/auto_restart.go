@@ -43,7 +43,7 @@ func (ar *AutoRestartHandle) tick(inst *Instance) {
 		// release restart lock
 		ar.unforceRestart()
 		// start instance immediately
-		inst.Run()
+		inst.Start()
 		return
 	}
 	// else
@@ -51,7 +51,7 @@ func (ar *AutoRestartHandle) tick(inst *Instance) {
 		go func() {
 			<-time.After(ar.interval)
 			if ar.maskLock == false {
-				inst.Run()
+				inst.Start()
 			} else {
 				ar.unmask()
 			}
