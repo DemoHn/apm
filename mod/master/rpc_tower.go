@@ -10,6 +10,12 @@ type Tower struct {
 	master *Master
 }
 
+// Ping - ping
+func (t *Tower) Ping(req *PingRequest, resp *PingResponse) error {
+	resp.Info = "pong"
+	return nil
+}
+
 // StartInstance - create & run an instance
 func (t *Tower) StartInstance(req *StartInstanceRequest, resp *StartInstanceResponse) error {
 	var err error

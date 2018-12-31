@@ -55,3 +55,13 @@ type ListInstanceRequest struct {
 type ListInstanceResponse struct {
 	InstanceInfos []instance.Info
 }
+
+// PingRequest -
+type PingRequest struct {
+	Info string
+}
+
+// PingResponse -
+type PingResponse struct {
+	Info string
+}

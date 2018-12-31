@@ -51,7 +51,7 @@ func Start(debugMode bool) error {
 	var p *os.Process
 	p, err = cntxt.Reborn()
 	if err != nil {
-		log.Infof("[apm] daemon has started")
+		log.Debugf("[apm] daemon has started")
 		return nil
 	}
 	// if fork process succeed, let the parent process

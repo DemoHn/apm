@@ -28,6 +28,7 @@ func parseArgs(args []string) error {
 		DaemonCmd("daemon"),
 		StartCmd("start"),
 		StopCmd("stop"),
+		RestartCmd("restart"),
 		ListCmd("list"),
 		KillCmd("kill"),
 	}
