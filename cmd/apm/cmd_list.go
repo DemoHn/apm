@@ -92,7 +92,7 @@ func stringifyStatus(status instance.StatusFlag) string {
 	statusMap := map[instance.StatusFlag]string{
 		instance.StatusReady:   "ready",
 		instance.StatusRunning: "running",
-		instance.StatusStopped: "stopeed",
+		instance.StatusStopped: "stopped",
 	}
 
 	return statusMap[status]
