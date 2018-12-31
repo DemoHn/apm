@@ -44,14 +44,13 @@ type Info struct {
 }
 
 // New apm instance (the basic unit of apm management, may contains multiple processes)
-func New(path string, args []string) *Instance {
+func New(path string, args []string, autoRestart bool) *Instance {
 	log = logger.Get()
 	inst := &Instance{
 		Path:        path,
 		Args:        args,
+		AutoRestart: autoRestart,
 		eventHandle: newEventHandle(),
-		// TODO: more config
-		AutoRestart: true,
 		// initial status
 		status:            initStatus(),
 		autoRestartHandle: newAutoRestartHandle(),

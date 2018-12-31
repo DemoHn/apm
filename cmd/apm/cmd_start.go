@@ -29,6 +29,10 @@ var startFlags = []cli.Flag{
 		Name:  "id",
 		Usage: "existing instance ID to start",
 	},
+	cli.BoolTFlag{
+		Name:  "autoRestart,r",
+		Usage: "enable auto-restart",
+	},
 }
 
 func startHandler(c *cli.Context) error {
@@ -40,13 +44,14 @@ func startHandler(c *cli.Context) error {
 	if id != 0 {
 		rid = &id
 	}
-	req := &master.StartInstanceRequest{
-		Command: c.String("cmd"),
-		Name:    c.String("name"),
-		ID:      rid,
+	req := master.StartInstanceRequest{
+		Command:     c.String("cmd"),
+		Name:        c.String("name"),
+		AutoRestart: c.Bool("autoRestart"),
+		ID:          rid,
 	}
 
-	err := sendRequest("Tower.StartInstance", req, &resp)
+	err := sendRequest("Tower.StartInstance", &req, &resp)
 	if err != nil {
 		return err
 	}

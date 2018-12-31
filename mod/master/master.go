@@ -51,7 +51,7 @@ func (m *Master) StartInstance(req *StartInstanceRequest) (*instance.Instance, e
 		return nil, err
 	}
 	// create instance
-	inst := instance.New(prog, args)
+	inst := instance.New(prog, args, req.AutoRestart)
 	err2 := m.addInstance(req.Name, inst)
 	if err2 != nil {
 		return nil, err2

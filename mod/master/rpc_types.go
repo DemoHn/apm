@@ -6,9 +6,10 @@ import (
 
 // StartInstanceRequest defines the input parameters of `Tower.StartInstance`
 type StartInstanceRequest struct {
-	Name    string
-	Command string
-	ID      *int
+	Name        string
+	Command     string
+	AutoRestart bool
+	ID          *int
 }
 
 // StartInstanceResponse defines the reply of `Tower.StartInstance`
