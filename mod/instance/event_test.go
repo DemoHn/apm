@@ -20,7 +20,7 @@ func TestEvent(t *testing.T) {
 
 		g.Before(func() {
 			cwd, _ := os.Getwd()
-			inst = New(cwd+"/../../bin/apm-test-helper", []string{"normal-run"})
+			inst = New(cwd+"/../../bin/apm-test-helper", []string{"normal-run"}, false)
 			inst.ID = expID
 		})
 
@@ -52,7 +52,7 @@ func TestEvent(t *testing.T) {
 		})
 
 		g.It("should receive event: ActionError (on start)", func() {
-			newInst := New("./nonexistingcommand", []string{})
+			newInst := New("./nonexistingcommand", []string{}, false)
 			newInst.ID = 300
 
 			var evtName string
@@ -88,7 +88,7 @@ func TestEvent(t *testing.T) {
 			var timeout = false
 
 			cwd, _ := os.Getwd()
-			nInst := New(cwd+"/../../bin/apm-test-helper", []string{"normal-run", strconv.Itoa(expExitCode)})
+			nInst := New(cwd+"/../../bin/apm-test-helper", []string{"normal-run", strconv.Itoa(expExitCode)}, false)
 			nInst.ID = 400
 
 			go func() {
@@ -129,7 +129,7 @@ func TestEvent(t *testing.T) {
 			var timeout = false
 
 			cwd, _ := os.Getwd()
-			nInst := New(cwd+"/../../bin/apm-test-helper", []string{"stop-on-time", "20", strconv.Itoa(expExitCode)})
+			nInst := New(cwd+"/../../bin/apm-test-helper", []string{"stop-on-time", "20", strconv.Itoa(expExitCode)}, false)
 			nInst.ID = 401
 
 			go func() {
@@ -158,7 +158,7 @@ func TestEvent(t *testing.T) {
 			var timeout = false
 
 			cwd, _ := os.Getwd()
-			nInst := New(cwd+"/../../bin/apm-test-helper", []string{"stop-on-time", "20"})
+			nInst := New(cwd+"/../../bin/apm-test-helper", []string{"stop-on-time", "20"}, false)
 			nInst.ID = 402
 
 			go func() {

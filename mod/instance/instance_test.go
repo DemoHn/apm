@@ -23,8 +23,8 @@ func TestInstance(t *testing.T) {
 		testHelperPath := filepath.Join(cwd, "../../bin/apm-test-helper")
 
 		g.Before(func() {
-			instN = New(testHelperPath, []string{"normal-run"})
-			instE = New("errorpath", []string{})
+			instN = New(testHelperPath, []string{"normal-run"}, false)
+			instE = New("errorpath", []string{}, false)
 		})
 
 		g.After(func() {
