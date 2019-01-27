@@ -1,9 +1,8 @@
-package util_test
+package process
 
 import (
 	"fmt"
 
-	"github.com/DemoHn/apm/util"
 	// goblin
 
 	"os"
@@ -36,7 +35,7 @@ func TestPidUsage(t *testing.T) {
 
 		g.It("should stat successfully", func() {
 			pid := cmd.Process.Pid
-			pidUsage := util.NewPidUsage(pid)
+			pidUsage := NewPidUsage(pid)
 
 			// wait for another 100ms
 			time.Sleep(100 * time.Millisecond)
@@ -59,7 +58,7 @@ func TestPidUsage(t *testing.T) {
 
 		g.It("should get stat failed /no such PID", func() {
 			nonexistPID := -1235
-			emptyUsage := util.NewPidUsage(nonexistPID)
+			emptyUsage := NewPidUsage(nonexistPID)
 
 			pidStat := emptyUsage.GetStat()
 			g.Assert(pidStat == nil).Eql(true)
