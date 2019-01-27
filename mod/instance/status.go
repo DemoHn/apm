@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/DemoHn/apm/infra/logger"
-	"github.com/DemoHn/apm/util"
 	deadlock "github.com/sasha-s/go-deadlock"
 )
 
@@ -23,7 +22,6 @@ type Status struct {
 	flag           StatusFlag
 	firstStart     bool
 	restartCounter int
-	pidusage       util.IPidUsage
 	// read-write lock
 	mu rwLocker
 }
@@ -100,20 +98,4 @@ func (s *Status) getRestartCounter() int {
 	defer s.mu.RUnlock()
 
 	return s.restartCounter
-}
-
-// getPidUsage - stat current process' CPU time
-func (s *Status) getPidUsage(pid int) *util.PidStat {
-	// only running instance could get Pid Usage
-	if s.getStatus() == StatusRunning {
-		if s.pidusage != nil && s.pidusage.GetPid() == pid {
-			// get recent stat
-			return s.pidusage.GetStat()
-		}
-		// new pidUsage object
-		s.pidusage = util.NewPidUsage(pid)
-		return s.pidusage.GetStat()
-	}
-
-	return nil
 }

@@ -3,7 +3,6 @@ package process
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"os/exec"
 	"runtime"
@@ -13,13 +12,15 @@ import (
 
 // IPidUsage - interface for pid usage
 type IPidUsage interface {
-	GetStat() *PidStat
-	GetPid() int
+	GetStat() (*PidStat, error)
+	GetPID() int
+	SetPID(pid int)
 }
 
 // PidUsage - main
 type PidUsage struct {
 	Pid        int
+	pidSet     bool
 	oldCPUStat *cpuTimeStat
 }
 
@@ -47,35 +48,50 @@ type cpuTimeStat struct {
 	uptime float64
 }
 
-// NewPidUsage - new PidUsage object
-func NewPidUsage(pid int) *PidUsage {
+// NewPidUsage - new Pidusage object
+func NewPidUsage() *PidUsage {
 	return &PidUsage{
-		Pid: pid,
+		pidSet: false,
 	}
 }
 
+// GetPID - get current pid
+func (usage *PidUsage) GetPID() int {
+	return usage.Pid
+}
+
+// SetPID - set PID to stat
+// Notice, once executed, *oldCPUInfo will be automatically removed!
+func (usage *PidUsage) SetPID(pid int) {
+	usage.pidSet = true
+	// clear old data
+	usage.oldCPUStat = nil
+	// set PID
+	usage.Pid = pid
+}
+
 // GetStat - get pid stat
-func (usage *PidUsage) GetStat() *PidStat {
+func (usage *PidUsage) GetStat() (*PidStat, error) {
+	var err error
 	var availableOS = []string{
 		"linux",
 		"freebsd",
 	}
+
+	if !usage.pidSet {
+		return nil, fmt.Errorf("[NotSet] Pid not set")
+	}
+
+	var stat *PidStat
 	for _, os := range availableOS {
 		if runtime.GOOS == os {
-			stat, err := usage.getStatOnNix()
-			if err != nil {
-				return nil
+			if stat, err = usage.getStatOnNix(); err != nil {
+				return nil, err
 			}
-			return stat
+			return stat, nil
 		}
 	}
-	log.Printf("OS:%s is not supported to get stat now!", runtime.GOOS)
-	return nil
-}
-
-// GetPid - get current pid
-func (usage *PidUsage) GetPid() int {
-	return usage.Pid
+	return nil, fmt.Errorf("[NotSupported] OS:%s is not supported to get stat now", runtime.GOOS)
 }
 
 // internal functions

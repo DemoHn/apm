@@ -92,7 +92,7 @@ func (inst *Instance) GetInfo() Info {
 		pid = command.GetPID()
 		info.PID = &pid
 
-		pidusage := status.getPidUsage(pid)
+		pidusage := command.GetUsage()
 		if pidusage != nil {
 			info.CPU = pointer.ToFloat64(pidusage.CPU)
 			info.Memory = pointer.ToInt64(pidusage.Memory)
