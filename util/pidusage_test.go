@@ -12,12 +12,13 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/franela/goblin"
+	"github.com/franela/goblin"
 )
 
 func TestPidUsage(t *testing.T) {
-	g := Goblin(t)
+	g := goblin.Goblin(t)
 	var cmd *exec.Cmd
+
 	g.Describe("Util > PidUsage", func() {
 		cwd, _ := os.Getwd()
 		testHelperPath := filepath.Join(cwd, "../bin/apm-test-helper")
