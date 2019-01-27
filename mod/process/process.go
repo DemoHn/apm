@@ -14,7 +14,6 @@ type IProcess interface {
 	Stop(os.Signal) error
 	Kill() error
 	GetUsage() *PidStat
-	IsExited() bool
 }
 
 // Process wraps and standardize the actual *exec.Cmd object
@@ -22,7 +21,7 @@ type Process struct {
 	// Cmd - currently we are using the standard lib
 	// maybe replace to our version later [TODO]
 	*exec.Cmd
-	pidUsage IPidUsage
+	PidUsage IPidUsage
 }
 
 // New - init a new process object
@@ -31,7 +30,7 @@ func New(name string, args ...string) *Process {
 
 	return &Process{
 		Cmd:      cmd,
-		pidUsage: NewPidUsage(),
+		PidUsage: NewPidUsage(),
 	}
 }
 
@@ -55,7 +54,7 @@ func (proc *Process) Start() error {
 	// set PID
 	osProc := proc.Cmd.Process
 	if osProc != nil {
-		proc.pidUsage.SetPID(osProc.Pid)
+		proc.PidUsage.SetPID(osProc.Pid)
 	}
 	return nil
 }
@@ -80,19 +79,10 @@ func (proc *Process) Kill() error {
 func (proc *Process) GetUsage() *PidStat {
 	var stat *PidStat
 	var err error
-	if stat, err = proc.pidUsage.GetStat(); err != nil {
+	if stat, err = proc.PidUsage.GetStat(); err != nil {
 		// just log error
-		fmt.Printf("[Error] %s", err.Error())
+		fmt.Printf("[Error] %s\n", err.Error())
 		return nil
 	}
 	return stat
-}
-
-// IsExited - to judge if a process is really exited
-func (proc *Process) IsExited() bool {
-	procState := proc.Cmd.ProcessState
-	if procState != nil {
-		return procState.Exited()
-	}
-	return true
 }

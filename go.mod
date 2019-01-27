@@ -4,6 +4,9 @@ require (
 	github.com/AlekSi/pointer v1.0.0
 	github.com/DemoHn/tablewriter v0.0.1
 	github.com/franela/goblin v0.0.0-20181003173013-ead4ad1d2727
+	github.com/golang/mock v1.2.0
+	github.com/google/pprof v0.0.0-20190109223431-e84dfd68c163 // indirect
+	github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6 // indirect
 	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/mdempsky/gocode v0.0.0-20181226182234-be056ad32a5e // indirect
