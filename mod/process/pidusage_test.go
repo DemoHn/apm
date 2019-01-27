@@ -20,7 +20,7 @@ func TestPidUsage(t *testing.T) {
 
 	g.Describe("Util > PidUsage", func() {
 		cwd, _ := os.Getwd()
-		testHelperPath := filepath.Join(cwd, "../bin/apm-test-helper")
+		testHelperPath := filepath.Join(cwd, "../../bin/apm-test-helper")
 
 		g.Before(func() {
 			cmd = exec.Command(testHelperPath, "normal-with-cost")
@@ -35,11 +35,20 @@ func TestPidUsage(t *testing.T) {
 
 		g.It("should stat successfully", func() {
 			pid := cmd.Process.Pid
-			pidUsage := NewPidUsage(pid)
-
+			pidUsage := NewPidUsage()
+			pidUsage.SetPID(pid)
 			// wait for another 100ms
 			time.Sleep(100 * time.Millisecond)
-			pidStat := pidUsage.GetStat()
+			// skip tests if OS is not *ix
+			if !pidUsage.supportedOS() {
+				fmt.Printf("Skip this test since current OS doesn't support yet\n")
+				return
+			}
+
+			pidStat, err := pidUsage.GetStat()
+			if err != nil {
+				g.Fail(err)
+			}
 			fmt.Printf("[debug] PID=%d, PPID=%d, CPU=%.2f, Memory=%d KB, Elapsed=%.2f ms\n",
 				pidStat.Pid,
 				pidStat.PPid,
@@ -58,9 +67,11 @@ func TestPidUsage(t *testing.T) {
 
 		g.It("should get stat failed /no such PID", func() {
 			nonexistPID := -1235
-			emptyUsage := NewPidUsage(nonexistPID)
+			emptyUsage := NewPidUsage()
+			emptyUsage.SetPID(nonexistPID)
+			pidStat, err := emptyUsage.GetStat()
 
-			pidStat := emptyUsage.GetStat()
+			g.Assert(err != nil).Equal(true)
 			g.Assert(pidStat == nil).Eql(true)
 		})
 	})

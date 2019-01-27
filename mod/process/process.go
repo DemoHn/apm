@@ -13,6 +13,7 @@ type IProcess interface {
 	Wait() error
 	Stop(os.Signal) error
 	Kill() error
+	GetUsage() *PidStat
 	IsExited() bool
 }
 
@@ -81,7 +82,7 @@ func (proc *Process) GetUsage() *PidStat {
 	var err error
 	if stat, err = proc.pidUsage.GetStat(); err != nil {
 		// just log error
-		fmt.Println("[Error] %s", err.Error())
+		fmt.Printf("[Error] %s", err.Error())
 		return nil
 	}
 	return stat

@@ -73,28 +73,41 @@ func (usage *PidUsage) SetPID(pid int) {
 // GetStat - get pid stat
 func (usage *PidUsage) GetStat() (*PidStat, error) {
 	var err error
+
+	if !usage.pidSet {
+		return nil, fmt.Errorf("[NotSet] Pid not set")
+	}
+	// OS should support
+	if !usage.supportedOS() {
+		return nil, fmt.Errorf("[NotSupported] OS:%s is not supported to get stat now", runtime.GOOS)
+	}
+
+	var stat *PidStat
+	if stat, err = usage.getStatOnNix(); err != nil {
+		return nil, err
+	}
+	return stat, nil
+
+}
+
+// internal functions
+
+// get supported OS
+func (usage *PidUsage) supportedOS() bool {
 	var availableOS = []string{
 		"linux",
 		"freebsd",
 	}
 
-	if !usage.pidSet {
-		return nil, fmt.Errorf("[NotSet] Pid not set")
-	}
-
-	var stat *PidStat
 	for _, os := range availableOS {
 		if runtime.GOOS == os {
-			if stat, err = usage.getStatOnNix(); err != nil {
-				return nil, err
-			}
-			return stat, nil
+			return true
 		}
 	}
-	return nil, fmt.Errorf("[NotSupported] OS:%s is not supported to get stat now", runtime.GOOS)
+
+	return false
 }
 
-// internal functions
 // get stat On *ix like systems (linux, unix)
 func (usage *PidUsage) getStatOnNix() (*PidStat, error) {
 	// TODO - new method to make memory RSS more precise!
